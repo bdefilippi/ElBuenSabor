@@ -14,6 +14,7 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using ElBuenSabor.Models;
 using ElBuenSabor.Controllers;
+using System.Globalization;
 
 namespace ElBuenSabor
 {
@@ -31,14 +32,22 @@ namespace ElBuenSabor
         {
 
             services.AddControllers();
-            services.AddDbContext<ElBuenSaborContext>(opt =>
-                                               opt.UseInMemoryDatabase("ElBuenSaborContext"));
+            services.AddDbContext<ElBuenSaborContext>(options =>
+            options.UseSqlServer(Configuration.GetConnectionString("Default")));
 
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            //En caso de problemas con las comas, descomentar esto!!
+
+            //var cultureInfo = new CultureInfo("en-US");
+            //cultureInfo.NumberFormat.NumberGroupSeparator = ",";
+
+            //CultureInfo.DefaultThreadCurrentCulture = cultureInfo;
+            //CultureInfo.DefaultThreadCurrentUICulture = cultureInfo;
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
