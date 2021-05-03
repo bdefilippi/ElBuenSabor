@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ElBuenSabor.Migrations
 {
     [DbContext(typeof(ElBuenSaborContext))]
-    [Migration("20210424234327_PrimerUpdate")]
-    partial class PrimerUpdate
+    [Migration("20210429211936_InitialCreation")]
+    partial class InitialCreation
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -34,9 +34,6 @@ namespace ElBuenSabor.Migrations
                     b.Property<bool>("EsInsumo")
                         .HasColumnType("bit");
 
-                    b.Property<long>("IdRubroArticulo")
-                        .HasColumnType("bigint");
-
                     b.Property<bool>("IsEnabled")
                         .HasColumnType("bit");
 
@@ -46,7 +43,7 @@ namespace ElBuenSabor.Migrations
                     b.Property<double>("PrecioVenta")
                         .HasColumnType("float");
 
-                    b.Property<long?>("RubroArticuloId")
+                    b.Property<long>("RubroArticuloID")
                         .HasColumnType("bigint");
 
                     b.Property<double>("StockActual")
@@ -60,7 +57,7 @@ namespace ElBuenSabor.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("RubroArticuloId");
+                    b.HasIndex("RubroArticuloID");
 
                     b.ToTable("ArticulosInsumo");
                 });
@@ -75,9 +72,6 @@ namespace ElBuenSabor.Migrations
                     b.Property<string>("Denominacion")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<long>("IdRubroGeneral")
-                        .HasColumnType("bigint");
-
                     b.Property<string>("Imagen")
                         .HasColumnType("nvarchar(max)");
 
@@ -87,7 +81,7 @@ namespace ElBuenSabor.Migrations
                     b.Property<double>("PrecioVenta")
                         .HasColumnType("float");
 
-                    b.Property<long?>("RubroGeneralId")
+                    b.Property<long>("RubroGeneralID")
                         .HasColumnType("bigint");
 
                     b.Property<int>("TiempoEstimadoCocina")
@@ -95,7 +89,7 @@ namespace ElBuenSabor.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("RubroGeneralId");
+                    b.HasIndex("RubroGeneralID");
 
                     b.ToTable("ArticulosManufacturados");
                 });
@@ -107,17 +101,14 @@ namespace ElBuenSabor.Migrations
                         .HasColumnType("bigint")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<long?>("ArticuloInsumoId")
+                    b.Property<long>("ArticuloInsumoID")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("ArticuloManufacturadoID")
                         .HasColumnType("bigint");
 
                     b.Property<double>("Cantidad")
                         .HasColumnType("float");
-
-                    b.Property<long>("IdArticuloInsumo")
-                        .HasColumnType("bigint");
-
-                    b.Property<long>("IdArticuloManufacturado")
-                        .HasColumnType("bigint");
 
                     b.Property<bool>("IsEnabled")
                         .HasColumnType("bit");
@@ -127,9 +118,9 @@ namespace ElBuenSabor.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ArticuloInsumoId");
+                    b.HasIndex("ArticuloInsumoID");
 
-                    b.HasIndex("IdArticuloManufacturado");
+                    b.HasIndex("ArticuloManufacturadoID");
 
                     b.ToTable("ArticulosManufacturadosDetalles");
                 });
@@ -144,17 +135,11 @@ namespace ElBuenSabor.Migrations
                     b.Property<string>("Apellido")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<long?>("DomicilioId")
+                    b.Property<long>("DomicilioID")
                         .HasColumnType("bigint");
 
                     b.Property<string>("Email")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<long>("IdDomicilio")
-                        .HasColumnType("bigint");
-
-                    b.Property<long>("IdUsuario")
-                        .HasColumnType("bigint");
 
                     b.Property<bool>("IsEnabled")
                         .HasColumnType("bit");
@@ -165,14 +150,14 @@ namespace ElBuenSabor.Migrations
                     b.Property<long>("Telefono")
                         .HasColumnType("bigint");
 
-                    b.Property<long?>("UsuarioId")
+                    b.Property<long>("UsuarioID")
                         .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("DomicilioId");
+                    b.HasIndex("DomicilioID");
 
-                    b.HasIndex("UsuarioId");
+                    b.HasIndex("UsuarioID");
 
                     b.ToTable("Clientes");
                 });
@@ -208,22 +193,16 @@ namespace ElBuenSabor.Migrations
                         .HasColumnType("bigint")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<long?>("ArticuloInsumoId")
+                    b.Property<long>("ArticuloInsumoID")
                         .HasColumnType("bigint");
 
-                    b.Property<long?>("ArticuloManufacturadoId")
+                    b.Property<long>("ArticuloManufacturadoID")
                         .HasColumnType("bigint");
 
                     b.Property<int>("Cantidad")
                         .HasColumnType("int");
 
-                    b.Property<long>("IdArticuloInsumo")
-                        .HasColumnType("bigint");
-
-                    b.Property<long>("IdArticuloManufacturado")
-                        .HasColumnType("bigint");
-
-                    b.Property<long>("IdFactura")
+                    b.Property<long>("FacturaID")
                         .HasColumnType("bigint");
 
                     b.Property<bool>("IsEnabled")
@@ -234,11 +213,11 @@ namespace ElBuenSabor.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ArticuloInsumoId");
+                    b.HasIndex("ArticuloInsumoID");
 
-                    b.HasIndex("ArticuloManufacturadoId");
+                    b.HasIndex("ArticuloManufacturadoID");
 
-                    b.HasIndex("IdFactura");
+                    b.HasIndex("FacturaID");
 
                     b.ToTable("DetallesFacturas");
                 });
@@ -250,37 +229,31 @@ namespace ElBuenSabor.Migrations
                         .HasColumnType("bigint")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<long?>("ArticuloInsumoId")
+                    b.Property<long>("ArticuloInsumoID")
                         .HasColumnType("bigint");
 
-                    b.Property<long?>("ArticuloManufacturadoId")
+                    b.Property<long>("ArticuloManufacturadoID")
                         .HasColumnType("bigint");
 
                     b.Property<int>("Cantidad")
                         .HasColumnType("int");
 
-                    b.Property<long>("IdArticuloInsumo")
-                        .HasColumnType("bigint");
-
-                    b.Property<long>("IdArticuloManufacturado")
-                        .HasColumnType("bigint");
-
-                    b.Property<long>("IdPedido")
-                        .HasColumnType("bigint");
-
                     b.Property<bool>("IsEnabled")
                         .HasColumnType("bit");
+
+                    b.Property<long>("PedidoID")
+                        .HasColumnType("bigint");
 
                     b.Property<double>("Subtotal")
                         .HasColumnType("float");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ArticuloInsumoId");
+                    b.HasIndex("ArticuloInsumoID");
 
-                    b.HasIndex("ArticuloManufacturadoId");
+                    b.HasIndex("ArticuloManufacturadoID");
 
-                    b.HasIndex("IdPedido");
+                    b.HasIndex("PedidoID");
 
                     b.ToTable("DetallesPedidos");
                 });
@@ -327,9 +300,6 @@ namespace ElBuenSabor.Migrations
 
                     b.Property<double>("MontoDescuento")
                         .HasColumnType("float");
-
-                    b.Property<string>("NroTarjeta")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<long>("Numero")
                         .HasColumnType("bigint");
@@ -388,16 +358,16 @@ namespace ElBuenSabor.Migrations
                         .HasColumnType("bigint")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<long?>("ClienteId")
+                    b.Property<long>("ClienteID")
                         .HasColumnType("bigint");
 
-                    b.Property<long?>("DomicilioId")
+                    b.Property<long>("DomicilioID")
                         .HasColumnType("bigint");
 
                     b.Property<int>("Estado")
                         .HasColumnType("int");
 
-                    b.Property<long?>("FacturaId")
+                    b.Property<long>("FacturaID")
                         .HasColumnType("bigint");
 
                     b.Property<DateTime>("Fecha")
@@ -406,22 +376,10 @@ namespace ElBuenSabor.Migrations
                     b.Property<DateTime>("HoraEstimadaFin")
                         .HasColumnType("datetime2");
 
-                    b.Property<long>("IdCliente")
-                        .HasColumnType("bigint");
-
-                    b.Property<long>("IdDomicilio")
-                        .HasColumnType("bigint");
-
-                    b.Property<long>("IdFactura")
-                        .HasColumnType("bigint");
-
-                    b.Property<long>("IdMercadoPagoDatos")
-                        .HasColumnType("bigint");
-
                     b.Property<bool>("IsEnabled")
                         .HasColumnType("bit");
 
-                    b.Property<long?>("MercadoPagoDatosId")
+                    b.Property<long>("MercadoPagoDatosID")
                         .HasColumnType("bigint");
 
                     b.Property<long>("Numero")
@@ -435,13 +393,13 @@ namespace ElBuenSabor.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ClienteId");
+                    b.HasIndex("ClienteID");
 
-                    b.HasIndex("DomicilioId");
+                    b.HasIndex("DomicilioID");
 
-                    b.HasIndex("FacturaId");
+                    b.HasIndex("FacturaID");
 
-                    b.HasIndex("MercadoPagoDatosId");
+                    b.HasIndex("MercadoPagoDatosID");
 
                     b.ToTable("Pedidos");
                 });
@@ -456,18 +414,15 @@ namespace ElBuenSabor.Migrations
                     b.Property<string>("Denominacion")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<long>("IdRubroPadre")
-                        .HasColumnType("bigint");
-
                     b.Property<bool>("IsEnabled")
                         .HasColumnType("bit");
 
-                    b.Property<long?>("RubroPadreId")
+                    b.Property<long>("RubroPadreID")
                         .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("RubroPadreId");
+                    b.HasIndex("RubroPadreID");
 
                     b.ToTable("RubrosArticulos");
                 });
@@ -518,7 +473,9 @@ namespace ElBuenSabor.Migrations
                 {
                     b.HasOne("ElBuenSabor.Models.RubroArticulo", "RubroArticulo")
                         .WithMany("ArticulosInsumo")
-                        .HasForeignKey("RubroArticuloId");
+                        .HasForeignKey("RubroArticuloID")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
 
                     b.Navigation("RubroArticulo");
                 });
@@ -527,7 +484,9 @@ namespace ElBuenSabor.Migrations
                 {
                     b.HasOne("ElBuenSabor.Models.RubroGeneral", "RubroGeneral")
                         .WithMany("ArticulosManufacturados")
-                        .HasForeignKey("RubroGeneralId");
+                        .HasForeignKey("RubroGeneralID")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
 
                     b.Navigation("RubroGeneral");
                 });
@@ -536,11 +495,13 @@ namespace ElBuenSabor.Migrations
                 {
                     b.HasOne("ElBuenSabor.Models.ArticuloInsumo", "ArticuloInsumo")
                         .WithMany("ArticuloManufacturadoDetalles")
-                        .HasForeignKey("ArticuloInsumoId");
+                        .HasForeignKey("ArticuloInsumoID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("ElBuenSabor.Models.ArticuloManufacturado", "ArticuloManufacturado")
                         .WithMany("ArticuloManufacturadoDetalles")
-                        .HasForeignKey("IdArticuloManufacturado")
+                        .HasForeignKey("ArticuloManufacturadoID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -553,11 +514,15 @@ namespace ElBuenSabor.Migrations
                 {
                     b.HasOne("ElBuenSabor.Models.Domicilio", "Domicilio")
                         .WithMany()
-                        .HasForeignKey("DomicilioId");
+                        .HasForeignKey("DomicilioID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("ElBuenSabor.Models.Usuario", "Usuario")
                         .WithMany()
-                        .HasForeignKey("UsuarioId");
+                        .HasForeignKey("UsuarioID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Domicilio");
 
@@ -568,15 +533,19 @@ namespace ElBuenSabor.Migrations
                 {
                     b.HasOne("ElBuenSabor.Models.ArticuloInsumo", "ArticuloInsumo")
                         .WithMany("DetalleFacturas")
-                        .HasForeignKey("ArticuloInsumoId");
+                        .HasForeignKey("ArticuloInsumoID")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
 
                     b.HasOne("ElBuenSabor.Models.ArticuloManufacturado", "ArticuloManufacturado")
                         .WithMany("DetallesFacturas")
-                        .HasForeignKey("ArticuloManufacturadoId");
+                        .HasForeignKey("ArticuloManufacturadoID")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
 
                     b.HasOne("ElBuenSabor.Models.Factura", "Factura")
                         .WithMany("DetallesFactura")
-                        .HasForeignKey("IdFactura")
+                        .HasForeignKey("FacturaID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -591,15 +560,19 @@ namespace ElBuenSabor.Migrations
                 {
                     b.HasOne("ElBuenSabor.Models.ArticuloInsumo", "ArticuloInsumo")
                         .WithMany("DetallePedidos")
-                        .HasForeignKey("ArticuloInsumoId");
+                        .HasForeignKey("ArticuloInsumoID")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
 
                     b.HasOne("ElBuenSabor.Models.ArticuloManufacturado", "ArticuloManufacturado")
                         .WithMany("DetallesPedidos")
-                        .HasForeignKey("ArticuloManufacturadoId");
+                        .HasForeignKey("ArticuloManufacturadoID")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
 
                     b.HasOne("ElBuenSabor.Models.Pedido", "Pedido")
                         .WithMany("DetallesPedido")
-                        .HasForeignKey("IdPedido")
+                        .HasForeignKey("PedidoID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -614,19 +587,27 @@ namespace ElBuenSabor.Migrations
                 {
                     b.HasOne("ElBuenSabor.Models.Cliente", "Cliente")
                         .WithMany("Pedidos")
-                        .HasForeignKey("ClienteId");
+                        .HasForeignKey("ClienteID")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
 
                     b.HasOne("ElBuenSabor.Models.Domicilio", "Domicilio")
-                        .WithMany()
-                        .HasForeignKey("DomicilioId");
+                        .WithMany("Pedidos")
+                        .HasForeignKey("DomicilioID")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
 
                     b.HasOne("ElBuenSabor.Models.Factura", "Factura")
                         .WithMany()
-                        .HasForeignKey("FacturaId");
+                        .HasForeignKey("FacturaID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("ElBuenSabor.Models.MercadoPagoDatos", "MercadoPagoDatos")
                         .WithMany()
-                        .HasForeignKey("MercadoPagoDatosId");
+                        .HasForeignKey("MercadoPagoDatosID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Cliente");
 
@@ -641,7 +622,9 @@ namespace ElBuenSabor.Migrations
                 {
                     b.HasOne("ElBuenSabor.Models.RubroArticulo", "RubroPadre")
                         .WithMany("RubrosHijos")
-                        .HasForeignKey("RubroPadreId");
+                        .HasForeignKey("RubroPadreID")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
 
                     b.Navigation("RubroPadre");
                 });
@@ -665,6 +648,11 @@ namespace ElBuenSabor.Migrations
                 });
 
             modelBuilder.Entity("ElBuenSabor.Models.Cliente", b =>
+                {
+                    b.Navigation("Pedidos");
+                });
+
+            modelBuilder.Entity("ElBuenSabor.Models.Domicilio", b =>
                 {
                     b.Navigation("Pedidos");
                 });

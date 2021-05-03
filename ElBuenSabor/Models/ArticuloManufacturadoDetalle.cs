@@ -11,9 +11,9 @@ namespace ElBuenSabor.Models
         public double Cantidad { get; set; }
         public String UnidadMedida { get; set; }
         public bool IsEnabled { get; set; }
-        public long IdArticuloManufacturado { get; set; }
+        public long ArticuloManufacturadoID { get; set; }
         public ArticuloManufacturado ArticuloManufacturado { get; set; }    //composicion
-        public long IdArticuloInsumo { get; set; }
+        public long ArticuloInsumoID { get; set; }
         public ArticuloInsumo ArticuloInsumo { get; set; }
 
     }

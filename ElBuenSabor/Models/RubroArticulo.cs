@@ -11,7 +11,7 @@ namespace ElBuenSabor.Models
         public String Denominacion { get; set; }
         public bool IsEnabled { get; set; }
         public ICollection<ArticuloInsumo> ArticulosInsumo { get; set; }
-        public long IdRubroPadre { get; set; }
+        public long RubroPadreID { get; set; }
         public RubroArticulo RubroPadre { get; set; }
         public ICollection<RubroArticulo> RubrosHijos { get; set; }
 

@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace ElBuenSabor.Migrations
 {
-    public partial class InitialCreate : Migration
+    public partial class InitialCreation : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -49,7 +49,6 @@ namespace ElBuenSabor.Migrations
                     Fecha = table.Column<DateTime>(type: "datetime2", nullable: false),
                     MontoDescuento = table.Column<double>(type: "float", nullable: false),
                     FormaPago = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    NroTarjeta = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     TotalVenta = table.Column<double>(type: "float", nullable: false),
                     TotalCosto = table.Column<double>(type: "float", nullable: false),
                     IsEnabled = table.Column<bool>(type: "bit", nullable: false)
@@ -87,18 +86,16 @@ namespace ElBuenSabor.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Denominacion = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     IsEnabled = table.Column<bool>(type: "bit", nullable: false),
-                    IdRubroPadre = table.Column<long>(type: "bigint", nullable: false),
-                    RubroPadreId = table.Column<long>(type: "bigint", nullable: true)
+                    RubroPadreID = table.Column<long>(type: "bigint", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_RubrosArticulos", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_RubrosArticulos_RubrosArticulos_RubroPadreId",
-                        column: x => x.RubroPadreId,
+                        name: "FK_RubrosArticulos_RubrosArticulos_RubroPadreID",
+                        column: x => x.RubroPadreID,
                         principalTable: "RubrosArticulos",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -145,18 +142,16 @@ namespace ElBuenSabor.Migrations
                     UnidadMedida = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     EsInsumo = table.Column<bool>(type: "bit", nullable: false),
                     IsEnabled = table.Column<bool>(type: "bit", nullable: false),
-                    IdRubroArticulo = table.Column<long>(type: "bigint", nullable: false),
-                    RubroArticuloId = table.Column<long>(type: "bigint", nullable: true)
+                    RubroArticuloID = table.Column<long>(type: "bigint", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_ArticulosInsumo", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_ArticulosInsumo_RubrosArticulos_RubroArticuloId",
-                        column: x => x.RubroArticuloId,
+                        name: "FK_ArticulosInsumo_RubrosArticulos_RubroArticuloID",
+                        column: x => x.RubroArticuloID,
                         principalTable: "RubrosArticulos",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -170,18 +165,16 @@ namespace ElBuenSabor.Migrations
                     PrecioVenta = table.Column<double>(type: "float", nullable: false),
                     Imagen = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     IsEnabled = table.Column<bool>(type: "bit", nullable: false),
-                    IdRubroGeneral = table.Column<long>(type: "bigint", nullable: false),
-                    RubroGeneralId = table.Column<long>(type: "bigint", nullable: true)
+                    RubroGeneralID = table.Column<long>(type: "bigint", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_ArticulosManufacturados", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_ArticulosManufacturados_RubrosGenerales_RubroGeneralId",
-                        column: x => x.RubroGeneralId,
+                        name: "FK_ArticulosManufacturados_RubrosGenerales_RubroGeneralID",
+                        column: x => x.RubroGeneralID,
                         principalTable: "RubrosGenerales",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -194,27 +187,25 @@ namespace ElBuenSabor.Migrations
                     Apellido = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Telefono = table.Column<long>(type: "bigint", nullable: false),
                     Email = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    IdUsuario = table.Column<long>(type: "bigint", nullable: false),
-                    UsuarioId = table.Column<long>(type: "bigint", nullable: true),
-                    IdDomicilio = table.Column<long>(type: "bigint", nullable: false),
-                    DomicilioId = table.Column<long>(type: "bigint", nullable: true),
+                    UsuarioID = table.Column<long>(type: "bigint", nullable: false),
+                    DomicilioID = table.Column<long>(type: "bigint", nullable: false),
                     IsEnabled = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Clientes", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Clientes_Domicilios_DomicilioId",
-                        column: x => x.DomicilioId,
+                        name: "FK_Clientes_Domicilios_DomicilioID",
+                        column: x => x.DomicilioID,
                         principalTable: "Domicilios",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Clientes_Usuarios_UsuarioId",
-                        column: x => x.UsuarioId,
+                        name: "FK_Clientes_Usuarios_UsuarioID",
+                        column: x => x.UsuarioID,
                         principalTable: "Usuarios",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -226,22 +217,21 @@ namespace ElBuenSabor.Migrations
                     Cantidad = table.Column<double>(type: "float", nullable: false),
                     UnidadMedida = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     IsEnabled = table.Column<bool>(type: "bit", nullable: false),
-                    IdArticuloManufacturado = table.Column<long>(type: "bigint", nullable: false),
-                    IdArticuloInsumo = table.Column<long>(type: "bigint", nullable: false),
-                    ArticuloInsumoId = table.Column<long>(type: "bigint", nullable: true)
+                    ArticuloManufacturadoID = table.Column<long>(type: "bigint", nullable: false),
+                    ArticuloInsumoID = table.Column<long>(type: "bigint", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_ArticulosManufacturadosDetalles", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_ArticulosManufacturadosDetalles_ArticulosInsumo_ArticuloInsumoId",
-                        column: x => x.ArticuloInsumoId,
+                        name: "FK_ArticulosManufacturadosDetalles_ArticulosInsumo_ArticuloInsumoID",
+                        column: x => x.ArticuloInsumoID,
                         principalTable: "ArticulosInsumo",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_ArticulosManufacturadosDetalles_ArticulosManufacturados_IdArticuloManufacturado",
-                        column: x => x.IdArticuloManufacturado,
+                        name: "FK_ArticulosManufacturadosDetalles_ArticulosManufacturados_ArticuloManufacturadoID",
+                        column: x => x.ArticuloManufacturadoID,
                         principalTable: "ArticulosManufacturados",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -256,30 +246,26 @@ namespace ElBuenSabor.Migrations
                     Cantidad = table.Column<int>(type: "int", nullable: false),
                     Subtotal = table.Column<double>(type: "float", nullable: false),
                     IsEnabled = table.Column<bool>(type: "bit", nullable: false),
-                    IdFactura = table.Column<long>(type: "bigint", nullable: false),
-                    IdArticuloManufacturado = table.Column<long>(type: "bigint", nullable: false),
-                    ArticuloManufacturadoId = table.Column<long>(type: "bigint", nullable: true),
-                    IdArticuloInsumo = table.Column<long>(type: "bigint", nullable: false),
-                    ArticuloInsumoId = table.Column<long>(type: "bigint", nullable: true)
+                    FacturaID = table.Column<long>(type: "bigint", nullable: false),
+                    ArticuloManufacturadoID = table.Column<long>(type: "bigint", nullable: false),
+                    ArticuloInsumoID = table.Column<long>(type: "bigint", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_DetallesFacturas", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_DetallesFacturas_ArticulosInsumo_ArticuloInsumoId",
-                        column: x => x.ArticuloInsumoId,
+                        name: "FK_DetallesFacturas_ArticulosInsumo_ArticuloInsumoID",
+                        column: x => x.ArticuloInsumoID,
                         principalTable: "ArticulosInsumo",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        principalColumn: "Id");
                     table.ForeignKey(
-                        name: "FK_DetallesFacturas_ArticulosManufacturados_ArticuloManufacturadoId",
-                        column: x => x.ArticuloManufacturadoId,
+                        name: "FK_DetallesFacturas_ArticulosManufacturados_ArticuloManufacturadoID",
+                        column: x => x.ArticuloManufacturadoID,
                         principalTable: "ArticulosManufacturados",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        principalColumn: "Id");
                     table.ForeignKey(
-                        name: "FK_DetallesFacturas_Facturas_IdFactura",
-                        column: x => x.IdFactura,
+                        name: "FK_DetallesFacturas_Facturas_FacturaID",
+                        column: x => x.FacturaID,
                         principalTable: "Facturas",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -297,43 +283,37 @@ namespace ElBuenSabor.Migrations
                     HoraEstimadaFin = table.Column<DateTime>(type: "datetime2", nullable: false),
                     TipoEnvio = table.Column<int>(type: "int", nullable: false),
                     Total = table.Column<double>(type: "float", nullable: false),
-                    IdCliente = table.Column<long>(type: "bigint", nullable: false),
-                    ClienteId = table.Column<long>(type: "bigint", nullable: true),
-                    IdDomicilio = table.Column<long>(type: "bigint", nullable: false),
-                    DomicilioId = table.Column<long>(type: "bigint", nullable: true),
-                    IdMercadoPagoDatos = table.Column<long>(type: "bigint", nullable: false),
-                    MercadoPagoDatosId = table.Column<long>(type: "bigint", nullable: true),
-                    IdFactura = table.Column<long>(type: "bigint", nullable: false),
-                    FacturaId = table.Column<long>(type: "bigint", nullable: true),
+                    ClienteID = table.Column<long>(type: "bigint", nullable: false),
+                    DomicilioID = table.Column<long>(type: "bigint", nullable: false),
+                    MercadoPagoDatosID = table.Column<long>(type: "bigint", nullable: false),
+                    FacturaID = table.Column<long>(type: "bigint", nullable: false),
                     IsEnabled = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Pedidos", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Pedidos_Clientes_ClienteId",
-                        column: x => x.ClienteId,
+                        name: "FK_Pedidos_Clientes_ClienteID",
+                        column: x => x.ClienteID,
                         principalTable: "Clientes",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        principalColumn: "Id");
                     table.ForeignKey(
-                        name: "FK_Pedidos_Domicilios_DomicilioId",
-                        column: x => x.DomicilioId,
+                        name: "FK_Pedidos_Domicilios_DomicilioID",
+                        column: x => x.DomicilioID,
                         principalTable: "Domicilios",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        principalColumn: "Id");
                     table.ForeignKey(
-                        name: "FK_Pedidos_Facturas_FacturaId",
-                        column: x => x.FacturaId,
+                        name: "FK_Pedidos_Facturas_FacturaID",
+                        column: x => x.FacturaID,
                         principalTable: "Facturas",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Pedidos_MercadoPagoDatos_MercadoPagoDatosId",
-                        column: x => x.MercadoPagoDatosId,
+                        name: "FK_Pedidos_MercadoPagoDatos_MercadoPagoDatosID",
+                        column: x => x.MercadoPagoDatosID,
                         principalTable: "MercadoPagoDatos",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -345,119 +325,115 @@ namespace ElBuenSabor.Migrations
                     Cantidad = table.Column<int>(type: "int", nullable: false),
                     Subtotal = table.Column<double>(type: "float", nullable: false),
                     IsEnabled = table.Column<bool>(type: "bit", nullable: false),
-                    IdPedido = table.Column<long>(type: "bigint", nullable: false),
-                    IdArticuloManufacturado = table.Column<long>(type: "bigint", nullable: false),
-                    ArticuloManufacturadoId = table.Column<long>(type: "bigint", nullable: true),
-                    IdArticuloInsumo = table.Column<long>(type: "bigint", nullable: false),
-                    ArticuloInsumoId = table.Column<long>(type: "bigint", nullable: true)
+                    PedidoID = table.Column<long>(type: "bigint", nullable: false),
+                    ArticuloManufacturadoID = table.Column<long>(type: "bigint", nullable: false),
+                    ArticuloInsumoID = table.Column<long>(type: "bigint", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_DetallesPedidos", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_DetallesPedidos_ArticulosInsumo_ArticuloInsumoId",
-                        column: x => x.ArticuloInsumoId,
+                        name: "FK_DetallesPedidos_ArticulosInsumo_ArticuloInsumoID",
+                        column: x => x.ArticuloInsumoID,
                         principalTable: "ArticulosInsumo",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        principalColumn: "Id");
                     table.ForeignKey(
-                        name: "FK_DetallesPedidos_ArticulosManufacturados_ArticuloManufacturadoId",
-                        column: x => x.ArticuloManufacturadoId,
+                        name: "FK_DetallesPedidos_ArticulosManufacturados_ArticuloManufacturadoID",
+                        column: x => x.ArticuloManufacturadoID,
                         principalTable: "ArticulosManufacturados",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        principalColumn: "Id");
                     table.ForeignKey(
-                        name: "FK_DetallesPedidos_Pedidos_IdPedido",
-                        column: x => x.IdPedido,
+                        name: "FK_DetallesPedidos_Pedidos_PedidoID",
+                        column: x => x.PedidoID,
                         principalTable: "Pedidos",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_ArticulosInsumo_RubroArticuloId",
+                name: "IX_ArticulosInsumo_RubroArticuloID",
                 table: "ArticulosInsumo",
-                column: "RubroArticuloId");
+                column: "RubroArticuloID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ArticulosManufacturados_RubroGeneralId",
+                name: "IX_ArticulosManufacturados_RubroGeneralID",
                 table: "ArticulosManufacturados",
-                column: "RubroGeneralId");
+                column: "RubroGeneralID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ArticulosManufacturadosDetalles_ArticuloInsumoId",
+                name: "IX_ArticulosManufacturadosDetalles_ArticuloInsumoID",
                 table: "ArticulosManufacturadosDetalles",
-                column: "ArticuloInsumoId");
+                column: "ArticuloInsumoID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ArticulosManufacturadosDetalles_IdArticuloManufacturado",
+                name: "IX_ArticulosManufacturadosDetalles_ArticuloManufacturadoID",
                 table: "ArticulosManufacturadosDetalles",
-                column: "IdArticuloManufacturado");
+                column: "ArticuloManufacturadoID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Clientes_DomicilioId",
+                name: "IX_Clientes_DomicilioID",
                 table: "Clientes",
-                column: "DomicilioId");
+                column: "DomicilioID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Clientes_UsuarioId",
+                name: "IX_Clientes_UsuarioID",
                 table: "Clientes",
-                column: "UsuarioId");
+                column: "UsuarioID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_DetallesFacturas_ArticuloInsumoId",
+                name: "IX_DetallesFacturas_ArticuloInsumoID",
                 table: "DetallesFacturas",
-                column: "ArticuloInsumoId");
+                column: "ArticuloInsumoID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_DetallesFacturas_ArticuloManufacturadoId",
+                name: "IX_DetallesFacturas_ArticuloManufacturadoID",
                 table: "DetallesFacturas",
-                column: "ArticuloManufacturadoId");
+                column: "ArticuloManufacturadoID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_DetallesFacturas_IdFactura",
+                name: "IX_DetallesFacturas_FacturaID",
                 table: "DetallesFacturas",
-                column: "IdFactura");
+                column: "FacturaID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_DetallesPedidos_ArticuloInsumoId",
+                name: "IX_DetallesPedidos_ArticuloInsumoID",
                 table: "DetallesPedidos",
-                column: "ArticuloInsumoId");
+                column: "ArticuloInsumoID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_DetallesPedidos_ArticuloManufacturadoId",
+                name: "IX_DetallesPedidos_ArticuloManufacturadoID",
                 table: "DetallesPedidos",
-                column: "ArticuloManufacturadoId");
+                column: "ArticuloManufacturadoID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_DetallesPedidos_IdPedido",
+                name: "IX_DetallesPedidos_PedidoID",
                 table: "DetallesPedidos",
-                column: "IdPedido");
+                column: "PedidoID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Pedidos_ClienteId",
+                name: "IX_Pedidos_ClienteID",
                 table: "Pedidos",
-                column: "ClienteId");
+                column: "ClienteID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Pedidos_DomicilioId",
+                name: "IX_Pedidos_DomicilioID",
                 table: "Pedidos",
-                column: "DomicilioId");
+                column: "DomicilioID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Pedidos_FacturaId",
+                name: "IX_Pedidos_FacturaID",
                 table: "Pedidos",
-                column: "FacturaId");
+                column: "FacturaID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Pedidos_MercadoPagoDatosId",
+                name: "IX_Pedidos_MercadoPagoDatosID",
                 table: "Pedidos",
-                column: "MercadoPagoDatosId");
+                column: "MercadoPagoDatosID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_RubrosArticulos_RubroPadreId",
+                name: "IX_RubrosArticulos_RubroPadreID",
                 table: "RubrosArticulos",
-                column: "RubroPadreId");
+                column: "RubroPadreID");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)

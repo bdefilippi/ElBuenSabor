@@ -12,6 +12,6 @@ namespace ElBuenSabor.Models
         public int Numero { get; set; }
         public String Localidad { get; set; }
         public bool IsEnabled { get; set; }
-
+        public ICollection<Pedido> Pedidos { get; set; }
     }
 }

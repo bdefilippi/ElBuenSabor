@@ -12,9 +12,9 @@ namespace ElBuenSabor.Models
         public String Apellido { get; set; }
         public long Telefono { get; set; }
         public String Email { get; set; }
-        public long IdUsuario { get; set; }
+        public long UsuarioID { get; set; }
         public Usuario Usuario { get; set; }
-        public long IdDomicilio { get; set; }
+        public long DomicilioID { get; set; }
         public Domicilio Domicilio { get; set; }
         public ICollection<Pedido> Pedidos { get; set; }
         public bool IsEnabled { get; set; }

@@ -12,7 +12,6 @@ namespace ElBuenSabor.Models
         public DateTime Fecha { get; set; }
         public double MontoDescuento { get; set; }
         public String FormaPago { get; set; }
-        public String NroTarjeta { get; set; }
         public double TotalVenta { get; set; }
         public double TotalCosto { get; set; }
         public bool IsEnabled { get; set; }

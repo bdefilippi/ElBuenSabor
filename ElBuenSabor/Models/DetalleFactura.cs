@@ -11,11 +11,11 @@ namespace ElBuenSabor.Models
         public int Cantidad { get; set; }
         public double Subtotal { get; set; }
         public bool IsEnabled { get; set; }
-        public long IdFactura { get; set; }
+        public long FacturaID { get; set; }
         public Factura Factura { get; set; }    //composicion
-        public long IdArticuloManufacturado { get; set; }
+        public long ArticuloManufacturadoID { get; set; }
         public ArticuloManufacturado ArticuloManufacturado { get; set; }
-        public long IdArticuloInsumo { get; set; }
+        public long ArticuloInsumoID { get; set; }
         public ArticuloInsumo ArticuloInsumo { get; set; }
     }
 }

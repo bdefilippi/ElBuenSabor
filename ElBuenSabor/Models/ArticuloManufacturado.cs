@@ -15,7 +15,7 @@ namespace ElBuenSabor.Models
         public double PrecioVenta { get; set; }
         public String Imagen { get; set; }
         public bool IsEnabled { get; set; }
-        public long IdRubroGeneral { get; set; }
+        public long RubroGeneralID { get; set; }
         public RubroGeneral RubroGeneral { get; set; }
         public ICollection<DetallePedido> DetallesPedidos { get; set; }
         public ICollection<DetalleFactura> DetallesFacturas { get; set; }

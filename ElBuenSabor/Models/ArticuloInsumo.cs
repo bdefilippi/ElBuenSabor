@@ -19,7 +19,7 @@ namespace ElBuenSabor.Models
         public ICollection<ArticuloManufacturadoDetalle> ArticuloManufacturadoDetalles { get; set; }
         public ICollection<DetallePedido> DetallePedidos { get; set; }
         public ICollection<DetalleFactura> DetalleFacturas { get; set; }
-        public long IdRubroArticulo { get; set; }
+        public long RubroArticuloID { get; set; }
         public RubroArticulo RubroArticulo { get; set; }
 
     }
