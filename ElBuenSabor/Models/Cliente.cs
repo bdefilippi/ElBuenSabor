@@ -14,10 +14,9 @@ namespace ElBuenSabor.Models
         public String Email { get; set; }
         public long UsuarioID { get; set; }
         public Usuario Usuario { get; set; }
-        public long DomicilioID { get; set; }
-        public Domicilio Domicilio { get; set; }
+        public ICollection<Domicilio> Domicilios { get; set; }
         public ICollection<Pedido> Pedidos { get; set; }
-        public bool IsEnabled { get; set; }
+        public bool Disabled { get; set; }
 
     }
 }

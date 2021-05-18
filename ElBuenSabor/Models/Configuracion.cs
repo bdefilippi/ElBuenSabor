@@ -12,7 +12,7 @@ namespace ElBuenSabor.Models
         public int CantidadCocineros { get; set; }
         public String EmailEmpresa { get; set; }
         public String TokenMercadoPago { get; set; }
-        public bool IsEnabled { get; set; }
+        public bool Disabled { get; set; }
 
 
     }

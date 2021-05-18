@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -13,6 +14,7 @@ namespace ElBuenSabor.Models
         public int Estado { get; set; }
         public DateTime HoraEstimadaFin { get; set; }
         public int TipoEnvio { get; set; }
+        [NotMapped]
         public double Total { get; set; }
         public long ClienteID { get; set; }
         public Cliente Cliente { get; set; }
@@ -22,7 +24,7 @@ namespace ElBuenSabor.Models
         public MercadoPagoDatos MercadoPagoDatos { get; set; }
         public long FacturaID { get; set; }
         public Factura Factura { get; set; }
-        public bool IsEnabled { get; set; }
+        public bool Disabled { get; set; }
         public ICollection<DetallePedido> DetallesPedido { get; set; }  //composicion
 
 

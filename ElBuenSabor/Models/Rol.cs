@@ -5,12 +5,12 @@ using System.Threading.Tasks;
 
 namespace ElBuenSabor.Models
 {
-    public class RubroArticulo
+    public class Rol
     {
         public long Id { get; set; }
-        public String Denominacion { get; set; }
+        public string Nombre { get; set; }
         public bool Disabled { get; set; }
-        public ICollection<Articulo> Articulos { get; set; }
+        public ICollection<Usuario> Usuarios { get; set; }
 
     }
 }
