@@ -15,3 +15,4 @@ namespace ElBuenSabor.Models
         public Articulo Articulo { get; set; }
         public ICollection<DetalleReceta> DetallesRecetas { get; set; }
     }
+}

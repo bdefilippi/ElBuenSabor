@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -20,6 +21,7 @@ namespace ElBuenSabor.Models
         public long RubroArticuloID { get; set; }
         public RubroArticulo RubroArticulo { get; set; }
         public ICollection<PrecioVentaArticulo> PreciosVentaArticulos { get; set; }
+        public ICollection<Receta> Recetas { get; set; }
         public ICollection<DetalleReceta> DetallesRecetas { get; set; }
         public ICollection<Stock> Stocks { get; set; }
         public ICollection<DetallePedido> DetallesPedidos { get; set; }

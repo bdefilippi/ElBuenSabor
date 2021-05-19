@@ -10,7 +10,7 @@ namespace ElBuenSabor.Controllers
     public class ElBuenSaborContext : DbContext
     {
         public ElBuenSaborContext(DbContextOptions<ElBuenSaborContext> options)
-            :base(options)
+            : base(options)
         {
 
         }
@@ -31,12 +31,26 @@ namespace ElBuenSabor.Controllers
                 .HasForeignKey(t => t.FacturaID)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            //ArticuloManufacturadoDetalle - ArticuloManufacturado (composicion)
-            modelBuilder.Entity<ArticuloManufacturadoDetalle>()
-                .HasOne<ArticuloManufacturado>(r => r.ArticuloManufacturado)
-                .WithMany(s => s.ArticuloManufacturadoDetalles)
-                .HasForeignKey(t => t.ArticuloManufacturadoID)
+            //Receta - Articulo (composicion)
+            modelBuilder.Entity<Receta>()
+                .HasOne<Articulo>(r => r.Articulo)
+                .WithMany(s => s.Recetas)
+                .HasForeignKey(t => t.ArticuloID)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            //DetalleReceta - Receta (composicion)
+            modelBuilder.Entity<DetalleReceta>()
+                .HasOne<Receta>(r => r.Receta)
+                .WithMany(s => s.DetallesRecetas)
+                .HasForeignKey(t => t.RecetaID)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            //DetalleReceta - Articulo (CAMBIADO)
+            modelBuilder.Entity<DetalleReceta>()
+                .HasOne<Articulo>(r => r.Articulo)
+                .WithMany(s => s.DetallesRecetas)
+                .HasForeignKey(t => t.ArticuloID)
+                .OnDelete(DeleteBehavior.NoAction);
 
             //Pedido - Cliente
             modelBuilder.Entity<Pedido>()
@@ -52,70 +66,45 @@ namespace ElBuenSabor.Controllers
                 .HasForeignKey(t => t.DomicilioID)
                 .OnDelete(DeleteBehavior.NoAction);
 
-            //ArticuloManufacturado - RubroGeneral
-            modelBuilder.Entity<ArticuloManufacturado>()
-                .HasOne<RubroGeneral>(r => r.RubroGeneral)
-                .WithMany(s => s.ArticulosManufacturados)
-                .HasForeignKey(t => t.RubroGeneralID)
-                .OnDelete(DeleteBehavior.NoAction);
-
-            //DetallePedido - ArticuloManufacturado
-            modelBuilder.Entity<DetallePedido>()
-                .HasOne<ArticuloManufacturado>(r => r.ArticuloManufacturado)
-                .WithMany(s => s.DetallesPedidos)
-                .HasForeignKey(t => t.ArticuloManufacturadoID)
-                .OnDelete(DeleteBehavior.NoAction);
-
-            //DetallePedido - ArticuloInsumo
-            modelBuilder.Entity<DetallePedido>()
-                .HasOne<ArticuloInsumo>(r => r.ArticuloInsumo)
-                .WithMany(s => s.DetallePedidos)
-                .HasForeignKey(t => t.ArticuloInsumoID)
-                .OnDelete(DeleteBehavior.NoAction);
-
-            //DetalleFactura - ArticuloManufacturado
-            modelBuilder.Entity<DetalleFactura>()
-                .HasOne<ArticuloManufacturado>(r => r.ArticuloManufacturado)
-                .WithMany(s => s.DetallesFacturas)
-                .HasForeignKey(t => t.ArticuloManufacturadoID)
-                .OnDelete(DeleteBehavior.NoAction);
-
-            //DetalleFactura - ArticuloInsumo
-            modelBuilder.Entity<DetalleFactura>()
-                .HasOne<ArticuloInsumo>(r => r.ArticuloInsumo)
-                .WithMany(s => s.DetalleFacturas)
-                .HasForeignKey(t => t.ArticuloInsumoID)
-                .OnDelete(DeleteBehavior.NoAction);
-
-            //ArticuloInsumo - RubroArticulo
-            modelBuilder.Entity<ArticuloInsumo>()
+            //Articulo - RubroArticulo
+            modelBuilder.Entity<Articulo>()
                 .HasOne<RubroArticulo>(r => r.RubroArticulo)
-                .WithMany(s => s.ArticulosInsumo)
+                .WithMany(s => s.Articulos)
                 .HasForeignKey(t => t.RubroArticuloID)
                 .OnDelete(DeleteBehavior.NoAction);
 
-            //RubroArticulo - RubroArticulo
-            modelBuilder.Entity<RubroArticulo>()
-                .HasOne<RubroArticulo>(r => r.RubroPadre)
-                .WithMany(s => s.RubrosHijos)
-                .HasForeignKey(t => t.RubroPadreID)
+            //DetallePedido - Articulo
+            modelBuilder.Entity<DetallePedido>()
+                .HasOne<Articulo>(r => r.Articulo)
+                .WithMany(s => s.DetallesPedidos)
+                .HasForeignKey(t => t.ArticuloID)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            //DetalleFactura - Articulo
+            modelBuilder.Entity<DetalleFactura>()
+                .HasOne<Articulo>(r => r.Articulo)
+                .WithMany(s => s.DetallesFacturas)
+                .HasForeignKey(t => t.ArticuloID)
                 .OnDelete(DeleteBehavior.NoAction);
 
         }
 
-        public DbSet<ArticuloInsumo> ArticulosInsumo { get; set; }
-        public DbSet<ArticuloManufacturado> ArticulosManufacturados { get; set; }
-        public DbSet<ArticuloManufacturadoDetalle> ArticulosManufacturadosDetalles { get; set; }
+        public DbSet<Articulo> Articulos { get; set; }
         public DbSet<Cliente> Clientes { get; set; }
         public DbSet<Configuracion> Configuraciones { get; set; }
         public DbSet<DetalleFactura> DetallesFacturas { get; set; }
         public DbSet<DetallePedido> DetallesPedidos { get; set; }
+        public DbSet<DetalleReceta> DetallesRecetas { get; set; }
         public DbSet<Domicilio> Domicilios { get; set; }
+        public DbSet<EgresoArticulo> EgresosArticulos { get; set; }
         public DbSet<Factura> Facturas { get; set; }
         public DbSet<MercadoPagoDatos> MercadoPagoDatos { get; set; }
         public DbSet<Pedido> Pedidos { get; set; }
+        public DbSet<PrecioVentaArticulo> PreciosVentaArticulos { get; set; }
+        public DbSet<Receta> Recetas { get; set; }
+        public DbSet<Rol> Roles { get; set; }
         public DbSet<RubroArticulo> RubrosArticulos { get; set; }
-        public DbSet<RubroGeneral> RubrosGenerales { get; set; }
+        public DbSet<Stock> Stocks { get; set; }
         public DbSet<Usuario> Usuarios { get; set; }
 
     }
