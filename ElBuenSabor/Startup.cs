@@ -15,6 +15,7 @@ using Microsoft.EntityFrameworkCore;
 using ElBuenSabor.Models;
 using ElBuenSabor.Controllers;
 using System.Globalization;
+using Newtonsoft.Json;
 
 namespace ElBuenSabor
 {
@@ -31,7 +32,10 @@ namespace ElBuenSabor
         public void ConfigureServices(IServiceCollection services)
         {
 
-            services.AddControllers();
+            services.AddControllers().AddNewtonsoftJson(o =>
+            {
+                o.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+            });
             services.AddDbContext<ElBuenSaborContext>(options =>
             options.UseSqlServer(Configuration.GetConnectionString("Default")));
 
@@ -53,6 +57,10 @@ namespace ElBuenSabor
                 app.UseDeveloperExceptionPage();
 
             }
+
+            app.UseDefaultFiles();
+
+            app.UseStaticFiles();
 
             app.UseHttpsRedirection();
 
