@@ -32,12 +32,15 @@ namespace ElBuenSabor
         public void ConfigureServices(IServiceCollection services)
         {
 
+
+            services.AddDbContext<ElBuenSaborContext>(
+                options => options.UseSqlServer("Server=den1.mssql8.gear.host;Database=elbuensabordb;" +
+                "Trusted_Connection=False;User Id=elbuensabordb; Password=#Base007;"));
+
             services.AddControllers().AddNewtonsoftJson(o =>
             {
                 o.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
             });
-            services.AddDbContext<ElBuenSaborContext>(options =>
-            options.UseSqlServer(Configuration.GetConnectionString("Default")));
 
         }
 
