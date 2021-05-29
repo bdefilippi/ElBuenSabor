@@ -20,5 +20,7 @@ namespace ElBuenSabor.Models
         public bool Disabled { get; set; }
         public ICollection<DetalleFactura> DetallesFactura { get; set; }    //Es composicion
 
+        public long PedidoId { get; set; }
+        public Pedido Pedido { get; set; }
     }
 }
