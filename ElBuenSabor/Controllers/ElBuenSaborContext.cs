@@ -87,6 +87,7 @@ namespace ElBuenSabor.Controllers
                 .HasForeignKey(t => t.ArticuloID)
                 .OnDelete(DeleteBehavior.NoAction);
 
+
         }
 
         public DbSet<Articulo> Articulos { get; set; }

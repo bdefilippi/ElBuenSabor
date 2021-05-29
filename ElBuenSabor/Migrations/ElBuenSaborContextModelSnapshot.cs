@@ -44,9 +44,6 @@ namespace ElBuenSabor.Migrations
                     b.Property<double>("StockMinimo")
                         .HasColumnType("float");
 
-                    b.Property<int>("TiempoEstimadoCocina")
-                        .HasColumnType("int");
-
                     b.Property<string>("UnidadMedida")
                         .HasColumnType("nvarchar(max)");
 
@@ -309,7 +306,12 @@ namespace ElBuenSabor.Migrations
                     b.Property<string>("NroTarjeta")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<long>("PedidoId")
+                        .HasColumnType("bigint");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("PedidoId");
 
                     b.ToTable("MercadoPagoDatos");
                 });
@@ -333,17 +335,11 @@ namespace ElBuenSabor.Migrations
                     b.Property<int>("Estado")
                         .HasColumnType("int");
 
-                    b.Property<long>("FacturaID")
-                        .HasColumnType("bigint");
-
                     b.Property<DateTime>("Fecha")
                         .HasColumnType("datetime2");
 
                     b.Property<DateTime>("HoraEstimadaFin")
                         .HasColumnType("datetime2");
-
-                    b.Property<long>("MercadoPagoDatosID")
-                        .HasColumnType("bigint");
 
                     b.Property<long>("Numero")
                         .HasColumnType("bigint");
@@ -356,10 +352,6 @@ namespace ElBuenSabor.Migrations
                     b.HasIndex("ClienteID");
 
                     b.HasIndex("DomicilioID");
-
-                    b.HasIndex("FacturaID");
-
-                    b.HasIndex("MercadoPagoDatosID");
 
                     b.ToTable("Pedidos");
                 });
@@ -613,6 +605,17 @@ namespace ElBuenSabor.Migrations
                     b.Navigation("Stock");
                 });
 
+            modelBuilder.Entity("ElBuenSabor.Models.MercadoPagoDatos", b =>
+                {
+                    b.HasOne("ElBuenSabor.Models.Pedido", "Pedido")
+                        .WithMany()
+                        .HasForeignKey("PedidoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Pedido");
+                });
+
             modelBuilder.Entity("ElBuenSabor.Models.Pedido", b =>
                 {
                     b.HasOne("ElBuenSabor.Models.Cliente", "Cliente")
@@ -627,25 +630,9 @@ namespace ElBuenSabor.Migrations
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("ElBuenSabor.Models.Factura", "Factura")
-                        .WithMany()
-                        .HasForeignKey("FacturaID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("ElBuenSabor.Models.MercadoPagoDatos", "MercadoPagoDatos")
-                        .WithMany()
-                        .HasForeignKey("MercadoPagoDatosID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.Navigation("Cliente");
 
                     b.Navigation("Domicilio");
-
-                    b.Navigation("Factura");
-
-                    b.Navigation("MercadoPagoDatos");
                 });
 
             modelBuilder.Entity("ElBuenSabor.Models.PrecioVentaArticulo", b =>

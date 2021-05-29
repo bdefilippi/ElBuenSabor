@@ -20,10 +20,6 @@ namespace ElBuenSabor.Models
         public Cliente Cliente { get; set; }
         public long DomicilioID { get; set; }
         public Domicilio Domicilio { get; set; }
-        public long MercadoPagoDatosID { get; set; }
-        public MercadoPagoDatos MercadoPagoDatos { get; set; }
-        public long FacturaID { get; set; }
-        public Factura Factura { get; set; }
         public bool Disabled { get; set; }
         public ICollection<DetallePedido> DetallesPedido { get; set; }  //composicion
 

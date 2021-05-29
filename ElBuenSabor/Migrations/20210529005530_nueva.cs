@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace ElBuenSabor.Migrations
 {
-    public partial class initialMigration : Migration
+    public partial class nueva : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -38,26 +38,6 @@ namespace ElBuenSabor.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Facturas", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "MercadoPagoDatos",
-                columns: table => new
-                {
-                    Id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    IdentificadorPago = table.Column<long>(type: "bigint", nullable: false),
-                    FechaCreacion = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    FechaAprobacion = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    FormaPago = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    MetodoPago = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    NroTarjeta = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Estado = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Disabled = table.Column<bool>(type: "bit", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_MercadoPagoDatos", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -120,7 +100,6 @@ namespace ElBuenSabor.Migrations
                     Imagen = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     UnidadMedida = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     StockMinimo = table.Column<double>(type: "float", nullable: false),
-                    TiempoEstimadoCocina = table.Column<int>(type: "int", nullable: false),
                     ALaVenta = table.Column<bool>(type: "bit", nullable: false),
                     Disabled = table.Column<bool>(type: "bit", nullable: false),
                     RubroArticuloID = table.Column<long>(type: "bigint", nullable: false)
@@ -342,8 +321,6 @@ namespace ElBuenSabor.Migrations
                     TipoEnvio = table.Column<int>(type: "int", nullable: false),
                     ClienteID = table.Column<long>(type: "bigint", nullable: false),
                     DomicilioID = table.Column<long>(type: "bigint", nullable: false),
-                    MercadoPagoDatosID = table.Column<long>(type: "bigint", nullable: false),
-                    FacturaID = table.Column<long>(type: "bigint", nullable: false),
                     Disabled = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
@@ -359,18 +336,6 @@ namespace ElBuenSabor.Migrations
                         column: x => x.DomicilioID,
                         principalTable: "Domicilios",
                         principalColumn: "Id");
-                    table.ForeignKey(
-                        name: "FK_Pedidos_Facturas_FacturaID",
-                        column: x => x.FacturaID,
-                        principalTable: "Facturas",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Pedidos_MercadoPagoDatos_MercadoPagoDatosID",
-                        column: x => x.MercadoPagoDatosID,
-                        principalTable: "MercadoPagoDatos",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -395,6 +360,33 @@ namespace ElBuenSabor.Migrations
                     table.ForeignKey(
                         name: "FK_DetallesPedidos_Pedidos_PedidoID",
                         column: x => x.PedidoID,
+                        principalTable: "Pedidos",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "MercadoPagoDatos",
+                columns: table => new
+                {
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    IdentificadorPago = table.Column<long>(type: "bigint", nullable: false),
+                    FechaCreacion = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    FechaAprobacion = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    FormaPago = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    MetodoPago = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    NroTarjeta = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Estado = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    PedidoId = table.Column<long>(type: "bigint", nullable: false),
+                    Disabled = table.Column<bool>(type: "bit", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_MercadoPagoDatos", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_MercadoPagoDatos_Pedidos_PedidoId",
+                        column: x => x.PedidoId,
                         principalTable: "Pedidos",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -456,6 +448,11 @@ namespace ElBuenSabor.Migrations
                 column: "StockID");
 
             migrationBuilder.CreateIndex(
+                name: "IX_MercadoPagoDatos_PedidoId",
+                table: "MercadoPagoDatos",
+                column: "PedidoId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Pedidos_ClienteID",
                 table: "Pedidos",
                 column: "ClienteID");
@@ -464,16 +461,6 @@ namespace ElBuenSabor.Migrations
                 name: "IX_Pedidos_DomicilioID",
                 table: "Pedidos",
                 column: "DomicilioID");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Pedidos_FacturaID",
-                table: "Pedidos",
-                column: "FacturaID");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Pedidos_MercadoPagoDatosID",
-                table: "Pedidos",
-                column: "MercadoPagoDatosID");
 
             migrationBuilder.CreateIndex(
                 name: "IX_PreciosVentaArticulos_ArticuloID",
@@ -511,10 +498,10 @@ namespace ElBuenSabor.Migrations
                 name: "EgresosArticulos");
 
             migrationBuilder.DropTable(
-                name: "PreciosVentaArticulos");
+                name: "MercadoPagoDatos");
 
             migrationBuilder.DropTable(
-                name: "Pedidos");
+                name: "PreciosVentaArticulos");
 
             migrationBuilder.DropTable(
                 name: "Recetas");
@@ -526,10 +513,7 @@ namespace ElBuenSabor.Migrations
                 name: "Stocks");
 
             migrationBuilder.DropTable(
-                name: "Domicilios");
-
-            migrationBuilder.DropTable(
-                name: "MercadoPagoDatos");
+                name: "Pedidos");
 
             migrationBuilder.DropTable(
                 name: "Facturas");
@@ -538,10 +522,13 @@ namespace ElBuenSabor.Migrations
                 name: "Articulos");
 
             migrationBuilder.DropTable(
-                name: "Clientes");
+                name: "Domicilios");
 
             migrationBuilder.DropTable(
                 name: "RubrosArticulos");
+
+            migrationBuilder.DropTable(
+                name: "Clientes");
 
             migrationBuilder.DropTable(
                 name: "Usuarios");
