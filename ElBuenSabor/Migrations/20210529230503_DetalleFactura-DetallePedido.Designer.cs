@@ -4,14 +4,16 @@ using ElBuenSabor.Controllers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace ElBuenSabor.Migrations
 {
     [DbContext(typeof(ElBuenSaborContext))]
-    partial class ElBuenSaborContextModelSnapshot : ModelSnapshot
+    [Migration("20210529230503_DetalleFactura-DetallePedido")]
+    partial class DetalleFacturaDetallePedido
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
