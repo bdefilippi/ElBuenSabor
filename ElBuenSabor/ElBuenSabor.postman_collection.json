@@ -1,0 +1,82 @@
+{
+	"info": {
+		"_postman_id": "d36269db-8859-4b0c-a3a9-fdc2453685ca",
+		"name": "ElBuenSabor",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Get articulos",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://localhost:44350/api/Articulos",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "44350",
+					"path": [
+						"api",
+						"Articulos"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get articulos Imagen Default",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://localhost:44350/api/Articulos/Image",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "44350",
+					"path": [
+						"api",
+						"Articulos",
+						"Image"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "SubirUnaImagen a Articulos",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "image",
+							"type": "file",
+							"src": "/G:/imagenes/36088037_2108273052751861_8072422252949274624_n.jpg"
+						}
+					]
+				},
+				"url": {
+					"raw": "https://localhost:44350/api/Articulos/UploadImage/1",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "44350",
+					"path": [
+						"api",
+						"Articulos",
+						"UploadImage",
+						"1"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
