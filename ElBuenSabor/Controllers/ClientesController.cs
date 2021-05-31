@@ -24,14 +24,20 @@ namespace ElBuenSabor.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Cliente>>> GetClientes()
         {
-            return await _context.Clientes.ToListAsync();
+            return await _context.Clientes
+                .ToListAsync();
         }
 
         // GET: api/Clientes/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Cliente>> GetCliente(long id)
         {
-            var cliente = await _context.Clientes.FindAsync(id);
+            var cliente = await _context.Clientes
+                .Include(d => d.Domicilios)
+                .Include(u => u.Usuario)
+                .Include(u => u.Usuario.Rol)
+                .FirstOrDefaultAsync(c => c.Id == id);
+
 
             if (cliente == null)
             {

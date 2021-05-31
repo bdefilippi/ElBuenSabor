@@ -4,14 +4,16 @@ using ElBuenSabor.Controllers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace ElBuenSabor.Migrations
 {
     [DbContext(typeof(ElBuenSaborContext))]
-    partial class ElBuenSaborContextModelSnapshot : ModelSnapshot
+    [Migration("20210529005530_nueva")]
+    partial class nueva
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -117,11 +119,11 @@ namespace ElBuenSabor.Migrations
                         .HasColumnType("bigint")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<long?>("ArticuloId")
+                    b.Property<long>("ArticuloID")
                         .HasColumnType("bigint");
 
-                    b.Property<long>("DetallePedidoID")
-                        .HasColumnType("bigint");
+                    b.Property<int>("Cantidad")
+                        .HasColumnType("int");
 
                     b.Property<bool>("Disabled")
                         .HasColumnType("bit");
@@ -131,9 +133,7 @@ namespace ElBuenSabor.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ArticuloId");
-
-                    b.HasIndex("DetallePedidoID");
+                    b.HasIndex("ArticuloID");
 
                     b.HasIndex("FacturaID");
 
@@ -272,12 +272,7 @@ namespace ElBuenSabor.Migrations
                     b.Property<long>("Numero")
                         .HasColumnType("bigint");
 
-                    b.Property<long>("PedidoId")
-                        .HasColumnType("bigint");
-
                     b.HasKey("Id");
-
-                    b.HasIndex("PedidoId");
 
                     b.ToTable("Facturas");
                 });
@@ -527,14 +522,10 @@ namespace ElBuenSabor.Migrations
 
             modelBuilder.Entity("ElBuenSabor.Models.DetalleFactura", b =>
                 {
-                    b.HasOne("ElBuenSabor.Models.Articulo", null)
+                    b.HasOne("ElBuenSabor.Models.Articulo", "Articulo")
                         .WithMany("DetallesFacturas")
-                        .HasForeignKey("ArticuloId");
-
-                    b.HasOne("ElBuenSabor.Models.DetallePedido", "DetallePedido")
-                        .WithMany()
-                        .HasForeignKey("DetallePedidoID")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .HasForeignKey("ArticuloID")
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.HasOne("ElBuenSabor.Models.Factura", "Factura")
@@ -543,7 +534,7 @@ namespace ElBuenSabor.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("DetallePedido");
+                    b.Navigation("Articulo");
 
                     b.Navigation("Factura");
                 });
@@ -614,17 +605,6 @@ namespace ElBuenSabor.Migrations
                     b.Navigation("DetalleFactura");
 
                     b.Navigation("Stock");
-                });
-
-            modelBuilder.Entity("ElBuenSabor.Models.Factura", b =>
-                {
-                    b.HasOne("ElBuenSabor.Models.Pedido", "Pedido")
-                        .WithMany()
-                        .HasForeignKey("PedidoId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Pedido");
                 });
 
             modelBuilder.Entity("ElBuenSabor.Models.MercadoPagoDatos", b =>
