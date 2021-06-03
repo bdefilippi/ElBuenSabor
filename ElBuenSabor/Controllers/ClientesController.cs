@@ -38,7 +38,6 @@ namespace ElBuenSabor.Controllers
                 .Include(u => u.Usuario.Rol)
                 .FirstOrDefaultAsync(c => c.Id == id);
 
-
             if (cliente == null)
             {
                 return NotFound();
