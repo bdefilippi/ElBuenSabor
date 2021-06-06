@@ -7,12 +7,20 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ElBuenSabor.Models;
 
+using System.Data;
+using Microsoft.Data;
+using Microsoft.Data.SqlClient;
+using Newtonsoft.Json;
+
 namespace ElBuenSabor.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
     public class ArticulosController : ControllerBase
     {
+
+
+
         private readonly ElBuenSaborContext _context;
 
         public ArticulosController(ElBuenSaborContext context)
@@ -93,6 +101,41 @@ namespace ElBuenSabor.Controllers
 
             return CreatedAtAction("GetArticulo", new { id = articulo.Id }, articulo);
         }
+
+        // POST: /api/Articulos/CostoReceta/1
+        [HttpGet("CostoReceta/{id}")]
+        public String PostArticuloCosto(long id)
+        {
+            string connectionString = "Server=den1.mssql8.gear.host;Database=elbuensabordb; Trusted_Connection=False;User Id=elbuensabordb; Password=#Base007;";
+            String Resupuesta = "";
+            string queryString = "EXECUTE BuscarCostosIngredientesDeArticuloPorId @pricePoint";
+
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                SqlCommand command = new SqlCommand(queryString, connection);
+                command.Parameters.AddWithValue("@pricePoint", id);
+                connection.Open();
+                SqlDataReader reader = command.ExecuteReader();
+                Resupuesta=sqlDatoToJson(reader);
+                //while (reader.Read())
+                //{
+                //    //Console.WriteLine("\t{0}", reader[0]);
+                //    Resupuesta = Convert.ToString(reader[0]);
+                //}
+                reader.Close();
+            }
+            return Resupuesta;
+        }
+
+        private String sqlDatoToJson(SqlDataReader dataReader)
+        {
+            var dataTable = new DataTable();
+            dataTable.Load(dataReader);
+            string JSONString = string.Empty;
+            JSONString = JsonConvert.SerializeObject(dataTable);
+            return JSONString;
+        }
+
 
         // DELETE: api/Articulos/5
         [HttpDelete("{id}")]
