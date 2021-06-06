@@ -75,6 +75,13 @@ namespace ElBuenSabor
             {
                 endpoints.MapControllers();
             });
+
+            app.UseCors(options => {
+                options.AllowAnyOrigin();
+                options.AllowAnyHeader();
+                options.AllowAnyMethod();
+            });
+
         }
     }
 }
