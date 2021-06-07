@@ -1,7 +1,5 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -21,9 +19,16 @@ namespace ElBuenSabor
 {
     public class Startup
     {
+        public const String ConnectionString = "Server=den1.mssql8.gear.host;Database=elbuensabordb;" +
+                "Trusted_Connection=False;User Id=elbuensabordb; Password=#Base007;";
+
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
+        }
+
+        public Startup()
+        {
         }
 
         public IConfiguration Configuration { get; }
@@ -34,13 +39,14 @@ namespace ElBuenSabor
 
 
             services.AddDbContext<ElBuenSaborContext>(
-                options => options.UseSqlServer("Server=den1.mssql8.gear.host;Database=elbuensabordb;" +
-                "Trusted_Connection=False;User Id=elbuensabordb; Password=#Base007;"));
+                options => options.UseSqlServer(ConnectionString));
 
             services.AddControllers().AddNewtonsoftJson(o =>
             {
                 o.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
             });
+
+            services.AddCors();
 
         }
 
@@ -65,16 +71,26 @@ namespace ElBuenSabor
 
             app.UseStaticFiles();
 
-            app.UseHttpsRedirection();
+            //app.UseHttpsRedirection();
 
             app.UseRouting();
+
+            app.UseCors(options => {
+                options.AllowAnyOrigin();
+                options.AllowAnyHeader();
+                options.AllowAnyMethod();
+            });
 
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+                
             });
+
+
+
         }
     }
 }

@@ -7,12 +7,17 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ElBuenSabor.Models;
 
+
+
 namespace ElBuenSabor.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
     public class ArticulosController : ControllerBase
     {
+
+
+
         private readonly ElBuenSaborContext _context;
 
         public ArticulosController(ElBuenSaborContext context)
@@ -35,7 +40,7 @@ namespace ElBuenSabor.Controllers
 
             var articulo = await _context.Articulos
                 .Include(s => s.Stocks)
-                .Include(r => r.Recetas).ThenInclude(d => d.DetallesRecetas).ThenInclude(a => a.Articulo)
+                .Include(r => r.Recetas)
                 .Include(d => d.RubroArticulo)
                 .Include(p => p.PreciosVentaArticulos) //probar order by descending
                 .FirstOrDefaultAsync(c => c.Id == id);
@@ -93,6 +98,37 @@ namespace ElBuenSabor.Controllers
 
             return CreatedAtAction("GetArticulo", new { id = articulo.Id }, articulo);
         }
+
+        //// GET: /api/Articulos/CostoReceta/1
+        //[HttpGet("CostoReceta/{id}")]
+        //public String GetArticuloCosto(long id)
+        //{
+        //    String queryString = "EXECUTE BuscarCostosIngredientesDeArticuloPorId @pricePoint";
+        //    SqlParameter[] parametros = { new SqlParameter("@pricePoint", id), };
+        //    return SQLQuery(queryString, parametros);
+        //}
+
+        // GET: /api/Articulos/Front/1
+        [HttpGet("Front/{id}")]
+        public String GetArticuloParaFront(long id)
+        {
+            SQLToJSON ArticuloParaFront = new SQLToJSON();
+
+            var parametros = new Dictionary<String, object>();
+            parametros["@pricePoint"] = id;
+
+            ArticuloParaFront.Agregar("EXECUTE ArticuloParaFront @pricePoint", parametros);
+            ArticuloParaFront.Agregar("EXECUTE CostoTotalDeArticuloConRecetaPorArticuloId @pricePoint", parametros);
+            ArticuloParaFront.Agregar("EXECUTE PrecioArticuloParaFront @pricePoint", parametros);
+            ArticuloParaFront.Agregar("ingredientes", "EXECUTE IngredientesParaFront @pricePoint", parametros);
+            ArticuloParaFront.Agregar("insumos", "EXECUTE InsumosParaFront @pricePoint", parametros);
+                       
+            return ArticuloParaFront.JSON();
+        }
+
+
+
+
 
         // DELETE: api/Articulos/5
         [HttpDelete("{id}")]
