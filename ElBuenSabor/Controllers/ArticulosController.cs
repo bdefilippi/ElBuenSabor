@@ -7,10 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ElBuenSabor.Models;
 
-using System.Data;
-using Microsoft.Data;
-using Microsoft.Data.SqlClient;
-using Newtonsoft.Json;
+
 
 namespace ElBuenSabor.Controllers
 {
@@ -102,39 +99,35 @@ namespace ElBuenSabor.Controllers
             return CreatedAtAction("GetArticulo", new { id = articulo.Id }, articulo);
         }
 
-        // POST: /api/Articulos/CostoReceta/1
-        [HttpGet("CostoReceta/{id}")]
-        public String PostArticuloCosto(long id)
-        {
-            string connectionString = "Server=den1.mssql8.gear.host;Database=elbuensabordb; Trusted_Connection=False;User Id=elbuensabordb; Password=#Base007;";
-            String Resupuesta = "";
-            string queryString = "EXECUTE BuscarCostosIngredientesDeArticuloPorId @pricePoint";
+        //// GET: /api/Articulos/CostoReceta/1
+        //[HttpGet("CostoReceta/{id}")]
+        //public String GetArticuloCosto(long id)
+        //{
+        //    String queryString = "EXECUTE BuscarCostosIngredientesDeArticuloPorId @pricePoint";
+        //    SqlParameter[] parametros = { new SqlParameter("@pricePoint", id), };
+        //    return SQLQuery(queryString, parametros);
+        //}
 
-            using (SqlConnection connection = new SqlConnection(connectionString))
-            {
-                SqlCommand command = new SqlCommand(queryString, connection);
-                command.Parameters.AddWithValue("@pricePoint", id);
-                connection.Open();
-                SqlDataReader reader = command.ExecuteReader();
-                Resupuesta=sqlDatoToJson(reader);
-                //while (reader.Read())
-                //{
-                //    //Console.WriteLine("\t{0}", reader[0]);
-                //    Resupuesta = Convert.ToString(reader[0]);
-                //}
-                reader.Close();
-            }
-            return Resupuesta;
+        // GET: /api/Articulos/Front/1
+        [HttpGet("Front/{id}")]
+        public String GetArticuloParaFront(long id)
+        {
+            SQLToJSON ArticuloParaFront = new SQLToJSON();
+
+            var parametros = new Dictionary<String, object>();
+            parametros["@pricePoint"] = id;
+
+            ArticuloParaFront.Agregar("EXECUTE ArticuloParaFront @pricePoint", parametros);
+            ArticuloParaFront.Agregar("EXECUTE CostoTotalDeArticuloConRecetaPorArticuloId @pricePoint", parametros);
+            ArticuloParaFront.Agregar("EXECUTE PrecioArticuloParaFront @pricePoint", parametros);
+            ArticuloParaFront.Agregar("ingredientes", "EXECUTE IngredientesParaFront @pricePoint", parametros);
+            ArticuloParaFront.Agregar("insumos", "EXECUTE InsumosParaFront @pricePoint", parametros);
+                       
+            return ArticuloParaFront.JSON();
         }
 
-        private String sqlDatoToJson(SqlDataReader dataReader)
-        {
-            var dataTable = new DataTable();
-            dataTable.Load(dataReader);
-            string JSONString = string.Empty;
-            JSONString = JsonConvert.SerializeObject(dataTable);
-            return JSONString;
-        }
+
+
 
 
         // DELETE: api/Articulos/5
