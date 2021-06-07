@@ -24,7 +24,9 @@ namespace ElBuenSabor.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<RubroArticulo>>> GetRubrosArticulos()
         {
-            return await _context.RubrosArticulos.ToListAsync();
+            return await _context.RubrosArticulos
+                .Include(a => a.Articulos)
+                .ToListAsync();
         }
 
         // GET: api/RubrosArticulos/5

@@ -31,7 +31,18 @@ namespace ElBuenSabor.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<Articulo>> GetArticulo(long id)
         {
-            var articulo = await _context.Articulos.FindAsync(id);
+            //var articulo = await _context.Articulos.FindAsync(id);
+
+            var articulo = await _context.Articulos
+                .Include(s => s.Stocks)
+                .Include(r => r.Recetas).ThenInclude(d => d.DetallesRecetas).ThenInclude(a => a.Articulo)
+                .Include(d => d.RubroArticulo)
+                .Include(p => p.PreciosVentaArticulos) //probar order by descending
+                .FirstOrDefaultAsync(c => c.Id == id);
+
+            var stocks = articulo.Stocks;
+
+            articulo.StockActual = CalcularStockActual(stocks);
 
             if (articulo == null)
             {
@@ -102,6 +113,19 @@ namespace ElBuenSabor.Controllers
         private bool ArticuloExists(long id)
         {
             return _context.Articulos.Any(e => e.Id == id);
+        }
+
+        [NonAction]
+        private int CalcularStockActual(ICollection<Stock> stocks)
+        {
+            var sumatoria = 0;
+
+            foreach (var stock in stocks)
+            {
+                sumatoria += stock.CantidadDisponible;
+            }
+
+            return sumatoria;
         }
     }
 }
