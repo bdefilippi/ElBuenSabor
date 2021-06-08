@@ -110,22 +110,29 @@ namespace ElBuenSabor.Controllers
 
         // GET: /api/Articulos/ParaFront
         [HttpGet("ParaFront")]
-        public String GetArticuloParaFront()
+        public String GetArticulosParaFront()
         {
             SQLToJSON ArticuloParaFront = new SQLToJSON();
             SQLToJSON RecetaParaFront = new SQLToJSON();
-
-            //var parametros = new Dictionary<String, object>();
-            //parametros["@pricePoint"] = id;
-            //ArticuloParaFront.Agregar("EXECUTE ArticuloParaFront @pricePoint", parametros);
-            //ArticuloParaFront.Agregar("EXECUTE PrecioArticuloParaFront @pricePoint", parametros);
-            //ArticuloParaFront.Agregar("ingredientes", "EXECUTE IngredientesParaFront @pricePoint", parametros);
-            //ArticuloParaFront.Agregar("insumos", "EXECUTE InsumosParaFront @pricePoint", parametros);
 
             ArticuloParaFront.Agregar("EXECUTE TodosLosArticulosAlaVentaParaFront");
             RecetaParaFront.Agregar("EXECUTE TodosLosIngredientesParaFront");
             return SQLToJSON.VincularArrayDeJSON(ArticuloParaFront.JSON(), "id", RecetaParaFront.JSON(), "ArticuloID", "Ingredientes");
 
+        }
+
+        // GET: /api/Articulos/ParaFront/1
+        [HttpGet("ParaFront/{id}")]
+        public String GetArticuloParaFront(long id)
+        {
+            SQLToJSON ArticuloParaFront = new SQLToJSON();
+            SQLToJSON RecetaParaFront = new SQLToJSON();
+
+            var parametros = new Dictionary<String, object>();
+            parametros["@pricePoint"] = id;
+            ArticuloParaFront.Agregar("EXECUTE ArticuloParaFront @pricePoint", parametros);
+            ArticuloParaFront.Agregar("ingredientes", "EXECUTE IngredientesParaFront @pricePoint", parametros);
+            return ArticuloParaFront.JSON();
         }
 
 
