@@ -7,7 +7,10 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ElBuenSabor.Models;
 
-
+//-------p/Imagen
+using Microsoft.AspNetCore.Hosting;
+using System.IO;
+//-------p/Imagen
 
 namespace ElBuenSabor.Controllers
 {
@@ -19,10 +22,15 @@ namespace ElBuenSabor.Controllers
 
 
         private readonly ElBuenSaborContext _context;
+        private static IWebHostEnvironment _environment; //Permite acceder a la carpeta del servidor para guardar imagenes
 
-        public ArticulosController(ElBuenSaborContext context)
+        public ArticulosController(ElBuenSaborContext context, IWebHostEnvironment environment)
         {
             _context = context;
+
+            //-------p/Imagen
+            _environment = environment;
+            //-------p/Imagen
         }
 
         // GET: api/Articulos
@@ -171,5 +179,63 @@ namespace ElBuenSabor.Controllers
 
             return sumatoria;
         }
+
+        //---------------------imagen-------------------------
+
+        // POST: /api/Articulos/UploadImage/1
+        [HttpPost("UploadImage/{id}"), DisableRequestSizeLimit]
+        public async Task<string> UploadFile([FromForm] IFormFile image, long id)
+        {
+
+            string path = Path.Combine(_environment.ContentRootPath, "Images/" + image.FileName);
+            using (var stream = new FileStream(path, FileMode.Create))
+            {
+                await image.CopyToAsync(stream);
+            }
+
+            AsignarImagen(image.FileName, id).Wait();
+            return image.FileName;
+
+        }
+
+        private async Task<bool> AsignarImagen(string FileName, long id)
+        {
+            var articulo = GetArticulo(id).Result.Value;
+            articulo.Imagen = FileName;
+            await PutArticulo(id, articulo);
+            return true;
+        }
+
+        // GET: /api/Articulos/Image/default.png
+        [HttpGet("Image/{fileName}")]
+        public IActionResult GetImage(string fileName)
+        {
+
+            string path = Path.Combine(_environment.ContentRootPath, "Images/" + fileName);
+            string defaultPath = Path.Combine(_environment.ContentRootPath, "Images/" + "default.png");
+            Console.WriteLine(fileName);
+            try
+            {
+                var image = System.IO.File.OpenRead(path);
+                return File(image, "image/jpeg");
+            }
+            catch (Exception)
+            {
+            }
+
+            var imageDefault = System.IO.File.OpenRead(defaultPath);
+            return File(imageDefault, "image/jpeg");
+        }
+
+        // GET: /api/Articulos/Image/
+        [HttpGet("Image/")]
+        public IActionResult GetDefault()
+        {
+            return GetImage("");
+        }
+
+        //-------------------fin imagen-----------------------
+
+
     }
 }
