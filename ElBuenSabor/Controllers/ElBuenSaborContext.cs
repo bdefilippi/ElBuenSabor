@@ -9,8 +9,7 @@ namespace ElBuenSabor.Controllers
 {
     public class ElBuenSaborContext : DbContext
     {
-        public ElBuenSaborContext(DbContextOptions<ElBuenSaborContext> options)
-            : base(options)
+        public ElBuenSaborContext(DbContextOptions<ElBuenSaborContext> options): base(options)
         {
 
         }

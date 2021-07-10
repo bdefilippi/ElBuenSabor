@@ -14,6 +14,11 @@ using ElBuenSabor.Models;
 using ElBuenSabor.Controllers;
 using System.Globalization;
 using Newtonsoft.Json;
+using ElBuenSabor.Services;
+using ElBuenSabor.Models.Common;
+using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 
 namespace ElBuenSabor
 {
@@ -48,6 +53,61 @@ namespace ElBuenSabor
 
             services.AddCors();
 
+            //-----------jwt
+            var jwtSettings = new JwtSettings();
+            Configuration.Bind(key: nameof(jwtSettings), jwtSettings);
+
+            services.AddSingleton(jwtSettings);
+
+            services.AddAuthentication(configureOptions: x => 
+            {
+                x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                x.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+            }).AddJwtBearer(x =>
+            {
+                x.RequireHttpsMetadata = false;
+                x.SaveToken = true;
+                //this will help us validate request as they come to our controllers
+                x.TokenValidationParameters = new TokenValidationParameters { 
+                //this wil validate the last bit of our jwt is using the secret 
+                //and make sure is authentic
+                    ValidateIssuerSigningKey=true,
+                    //we need a bytearray, and the secret is a string, so we need to use enconding
+                    IssuerSigningKey= new SymmetricSecurityKey(Encoding.ASCII.GetBytes(jwtSettings.Secreto)),
+                    //Basic jwt authentication
+                    ValidateIssuer = false,
+                    ValidateAudience=false,
+                    RequireExpirationTime=false,
+                    ValidateLifetime=true
+                };
+            }
+             );
+
+            /*Esto inyecta una dependencia (???)
+ ahora no hace falta agregarlo. lo puedo recibir con cada solicitud/request
+porque lo estoy agregandolo con Scoped (???) que es parte del framework MVC.net (???)
+Con esto se agregan servicios parece, que por alguna razon deben tener una
+interfaz y un objeto que la implemente (será una comprobacion de seguridad?)
+ The AddScoped method registers the service with a scoped lifetime, the lifetime of a single request. 
+             
+             */
+            services.AddScoped<IUsuarioService, UsuarioService>();
+
+
+
+
+
+
+
+
+
+
+            //-----------jwt
+
+
+
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -81,6 +141,7 @@ namespace ElBuenSabor
                 options.AllowAnyMethod();
             });
 
+            app.UseAuthentication(); //necesario para el jwt
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>

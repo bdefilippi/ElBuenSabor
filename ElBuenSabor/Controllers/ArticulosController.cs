@@ -12,10 +12,15 @@ using Microsoft.AspNetCore.Hosting;
 using System.IO;
 //-------p/Imagen
 
+//-------Jwt
+using Microsoft.AspNetCore.Authorization;
+//-------Jwt
+
 namespace ElBuenSabor.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class ArticulosController : ControllerBase
     {
 
