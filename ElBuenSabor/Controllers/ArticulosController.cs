@@ -20,7 +20,7 @@ namespace ElBuenSabor.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
+    //[Authorize]
     public class ArticulosController : ControllerBase
     {
 
