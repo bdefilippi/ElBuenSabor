@@ -6,6 +6,9 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ElBuenSabor.Models;
+using MercadoPago.Config;
+using MercadoPago.Client.Preference;
+using MercadoPago.Resource.Preference;
 
 namespace ElBuenSabor.Controllers
 {
@@ -80,6 +83,29 @@ namespace ElBuenSabor.Controllers
             _context.Pedidos.Add(pedido);
             await _context.SaveChangesAsync();
 
+            MercadoPagoConfig.AccessToken = "TEST-5059945658019779-070913-a1924cb562898b6ed9191db0f41badf6-155784029";
+
+            var request = new PreferenceRequest
+            {
+                Items = new List<PreferenceItemRequest>
+    {
+        new PreferenceItemRequest
+        {
+            Title = "carrito",
+            Quantity = 1,
+            CurrencyId = "ARS",
+            UnitPrice = (decimal?)pedido.Total
+        },
+    },
+            };
+
+            // Crea la preferencia usando el client
+            var client = new PreferenceClient();
+
+            Preference preference = await client.CreateAsync(request);
+
+            Console.WriteLine(preference);
+
             return CreatedAtAction("GetPedido", new { id = pedido.Id }, pedido);
         }
 
@@ -102,6 +128,9 @@ namespace ElBuenSabor.Controllers
         private bool PedidoExists(long id)
         {
             return _context.Pedidos.Any(e => e.Id == id);
-        }
+        } 
+
+
+
     }
 }
