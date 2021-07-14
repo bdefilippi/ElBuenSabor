@@ -35,9 +35,11 @@ namespace ElBuenSabor.Services
             {
                 string spassword = Encrypt.GetSHA256(model.Clave);
                 var usuario = _context.Usuarios
+                    .Include(r => r.Rol)
                     .Where(u => u.NombreUsuario == model.NombreUsuario && u.Clave == spassword)
                     .FirstOrDefault();
                 if (usuario == null) return null;
+
                 usuarioResponse.NombreUsuario = usuario.NombreUsuario;
                 usuarioResponse.Token = GetToken(usuario);
             }
@@ -54,7 +56,8 @@ namespace ElBuenSabor.Services
                     new Claim[]
                     {
                         new Claim(ClaimTypes.NameIdentifier, usuario.Id.ToString()),
-                        new Claim(ClaimTypes.Name,usuario.NombreUsuario.ToString())
+                        new Claim(ClaimTypes.Name,usuario.NombreUsuario.ToString()),
+                        new Claim(ClaimTypes.Role,usuario.Rol.Nombre.ToString())
                     }
                     ),
                 Expires=DateTime.UtcNow.AddDays(60),

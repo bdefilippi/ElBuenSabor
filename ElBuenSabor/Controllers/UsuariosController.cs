@@ -120,23 +120,18 @@ namespace ElBuenSabor.Controllers
         [HttpPost("login")]
         public IActionResult Autentificar([FromBody] AuthRequest model )
         {
-            Respuesta respuesta = new Respuesta();
 
             //quiero que genere un usuarioResponse cuando se autentifique
             var usuarioResponse = _usuarioService.Auth(model);
 
             if (usuarioResponse == null)
             {
-                respuesta.Exito = 0;
-                respuesta.Mensaje = "Usuario o contraseña incorrecta";
-                return BadRequest(respuesta);
+                return BadRequest("Usuario o contraseña incorrecta");
             }
-            respuesta.Exito = 1;
-            respuesta.Data = usuarioResponse;
+            return Ok(usuarioResponse);
 
-            return Ok(respuesta);
         }
-        //------------------------------------------------
+        //----------------------fin autenticacion--------------------------
 
     }
 }

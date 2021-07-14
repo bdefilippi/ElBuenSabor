@@ -42,7 +42,6 @@ namespace ElBuenSabor
         public void ConfigureServices(IServiceCollection services)
         {
 
-
             services.AddDbContext<ElBuenSaborContext>(
                 options => options.UseSqlServer(ConnectionString));
 
@@ -84,24 +83,13 @@ namespace ElBuenSabor
             }
              );
 
-            /*Esto inyecta una dependencia (???)
- ahora no hace falta agregarlo. lo puedo recibir con cada solicitud/request
-porque lo estoy agregandolo con Scoped (???) que es parte del framework MVC.net (???)
-Con esto se agregan servicios parece, que por alguna razon deben tener una
-interfaz y un objeto que la implemente (será una comprobacion de seguridad?)
- The AddScoped method registers the service with a scoped lifetime, the lifetime of a single request. 
-             
+            /*
+             Permite que mediante el contructor de una clase, se pueda inyectar la dependencia
+            IUsuarioService
+            The AddScoped method registers the service with a scoped lifetime,
+            the lifetime of a single request. 
              */
             services.AddScoped<IUsuarioService, UsuarioService>();
-
-
-
-
-
-
-
-
-
 
             //-----------jwt
 
@@ -141,7 +129,8 @@ interfaz y un objeto que la implemente (será una comprobacion de seguridad?)
                 options.AllowAnyMethod();
             });
 
-            app.UseAuthentication(); //necesario para el jwt
+            app.UseAuthentication(); //necesario para poder usar el jwt agregado authorize a los controllers
+
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>

@@ -20,11 +20,14 @@ namespace ElBuenSabor.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+<<<<<<< Updated upstream
     //[Authorize]
+=======
+    [Authorize(Roles = "Usuario,Administrador,Cajero,Cocinero")]
+
+>>>>>>> Stashed changes
     public class ArticulosController : ControllerBase
     {
-
-
 
         private readonly ElBuenSaborContext _context;
         private static IWebHostEnvironment _environment; //Permite acceder a la carpeta del servidor para guardar imagenes
