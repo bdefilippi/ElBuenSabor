@@ -8,7 +8,9 @@ namespace ElBuenSabor.Models.Response
     public class UsuarioResponse
     {
         public string NombreUsuario { get; set; }
+        public string Rol { get; set; }
         public string Token { get;  set; }
+        
 
         /*El papeleo para identificarte es el login
         Una vez hecho el papeleo para identificarte 

@@ -20,12 +20,8 @@ namespace ElBuenSabor.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-<<<<<<< Updated upstream
-    //[Authorize]
-=======
-    [Authorize(Roles = "Usuario,Administrador,Cajero,Cocinero")]
+    //[Authorize(Roles = "Usuario,Administrador,Cajero,Cocinero")]
 
->>>>>>> Stashed changes
     public class ArticulosController : ControllerBase
     {
 
