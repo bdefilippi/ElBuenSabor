@@ -10,7 +10,7 @@ namespace ElBuenSabor.Models.Response
         public string NombreUsuario { get; set; }
         public string Rol { get; set; }
         public string Token { get;  set; }
-        
+        public object Cliente { get; set; }
 
         /*El papeleo para identificarte es el login
         Una vez hecho el papeleo para identificarte 

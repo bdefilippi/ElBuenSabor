@@ -40,9 +40,22 @@ namespace ElBuenSabor.Services
                     .FirstOrDefault();
                 if (usuario == null) return null;
 
+                var cliente = _context.Clientes
+                    .Include(d => d.Domicilios)
+                    .Where(u => u.UsuarioID == usuario.Id)
+                    .Select(c => new {
+                        nombre = c.Nombre,
+                        apellido = c.Apellido,
+                        telefono = c.Telefono,
+                        email = c.Email,
+                        domicilios=c.Domicilios
+                    })
+                    .FirstOrDefault();
+
                 usuarioResponse.NombreUsuario = usuario.NombreUsuario;
                 usuarioResponse.Token = GetToken(usuario);
                 usuarioResponse.Rol = usuario.Rol.Nombre;
+                usuarioResponse.Cliente = cliente;
             }
             return usuarioResponse;
         }
