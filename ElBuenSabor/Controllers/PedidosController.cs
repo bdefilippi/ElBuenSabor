@@ -83,6 +83,16 @@ namespace ElBuenSabor.Controllers
             _context.Pedidos.Add(pedido);
             await _context.SaveChangesAsync();
 
+      
+            return CreatedAtAction("GetPedido", new { id = pedido.Id }, pedido);
+        }
+
+        // POST: api/Pedidos
+        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        [HttpPost("{total}")]
+        public async Task<ActionResult<Preference>> MercadoPago(decimal total)
+        {
+
             MercadoPagoConfig.AccessToken = "TEST-5059945658019779-070913-a1924cb562898b6ed9191db0f41badf6-155784029";
 
             var request = new PreferenceRequest
@@ -91,23 +101,21 @@ namespace ElBuenSabor.Controllers
     {
         new PreferenceItemRequest
         {
-            Title = "carrito",
+            Title = "Carrito",
             Quantity = 1,
             CurrencyId = "ARS",
-            UnitPrice = (decimal?)pedido.Total
+            UnitPrice = total,
         },
     },
             };
 
             // Crea la preferencia usando el client
             var client = new PreferenceClient();
-
             Preference preference = await client.CreateAsync(request);
-
-            Console.WriteLine(preference);
-
-            return CreatedAtAction("GetPedido", new { id = pedido.Id }, pedido);
+            
+            return preference;
         }
+
 
         // DELETE: api/Pedidos/5
         [HttpDelete("{id}")]
