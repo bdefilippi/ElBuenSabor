@@ -44,6 +44,7 @@ namespace ElBuenSabor.Services
                     .Include(d => d.Domicilios)
                     .Where(u => u.UsuarioID == usuario.Id)
                     .Select(c => new {
+                        id= c.Id,
                         nombre = c.Nombre,
                         apellido = c.Apellido,
                         telefono = c.Telefono,
