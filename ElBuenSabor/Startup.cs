@@ -19,6 +19,7 @@ using ElBuenSabor.Models.Common;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using ElBuenSabor.Hubs;
 
 namespace ElBuenSabor
 {
@@ -93,6 +94,7 @@ namespace ElBuenSabor
 
             //-----------jwt
 
+            services.AddSignalR();
 
 
 
@@ -124,19 +126,20 @@ namespace ElBuenSabor
             app.UseRouting();
 
             app.UseCors(options => {
-                options.AllowAnyOrigin();
+                options.WithOrigins("http://localhost:8080");
+                //options.AllowAnyOrigin();
                 options.AllowAnyHeader();
                 options.AllowAnyMethod();
+                options.AllowCredentials(); //no se puede habilitar cualquier credencial y cualquier origen al mismo tiempo. No se por qué
             });
 
             app.UseAuthentication(); //necesario para poder usar el jwt agregado authorize a los controllers
-
-            app.UseAuthorization();
+            app.UseAuthorization(); //deben estar en este orden para que no tire error
 
             app.UseEndpoints(endpoints =>
             {
+                endpoints.MapHub<NotificacionesAClienteHub>("/notificacionesHub");
                 endpoints.MapControllers();
-                
             });
 
 

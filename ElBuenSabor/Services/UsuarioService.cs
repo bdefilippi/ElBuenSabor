@@ -48,7 +48,6 @@ namespace ElBuenSabor.Services
                         nombre = c.Nombre,
                         apellido = c.Apellido,
                         telefono = c.Telefono,
-                        email = c.Email,
                         domicilios=c.Domicilios
                     })
                     .FirstOrDefault();

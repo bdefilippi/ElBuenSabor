@@ -9,6 +9,8 @@ using ElBuenSabor.Models;
 using MercadoPago.Config;
 using MercadoPago.Client.Preference;
 using MercadoPago.Resource.Preference;
+using ElBuenSabor.Hubs;
+using Microsoft.AspNetCore.SignalR;
 
 namespace ElBuenSabor.Controllers
 {
@@ -17,10 +19,12 @@ namespace ElBuenSabor.Controllers
     public class PedidosController : ControllerBase
     {
         private readonly ElBuenSaborContext _context;
+        private readonly IHubContext<NotificacionesAClienteHub> _hubContext;
 
-        public PedidosController(ElBuenSaborContext context)
+        public PedidosController(ElBuenSaborContext context, IHubContext<NotificacionesAClienteHub> notificacionesAClienteHub)
         {
             _context = context;
+            _hubContext = notificacionesAClienteHub;
         }
 
         // GET: api/Pedidos
@@ -82,8 +86,15 @@ namespace ElBuenSabor.Controllers
         {
             _context.Pedidos.Add(pedido);
             await _context.SaveChangesAsync();
+            //-------notificacion
 
-      
+            await _hubContext
+            .Clients
+            .All
+            .SendAsync("NotificacionPedidoRecibido", "Su pedido esta pendiente de aprobacion");
+
+            //-------fin notificacion
+
             return CreatedAtAction("GetPedido", new { id = pedido.Id }, pedido);
         }
 
