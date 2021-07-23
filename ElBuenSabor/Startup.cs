@@ -94,7 +94,15 @@ namespace ElBuenSabor
 
             //-----------jwt
 
-            services.AddSignalR();
+
+            /*I have increased the size for Singal R and that fixed the issue for now but this is not a proper solution.
+              The proper solution is to implement your own hub between client and server and process in chunks and stick it together.
+              refer to : https://docs.microsoft.com/en-us/aspnet/core/signalr/streaming?view=aspnetcore-3.1
+             */
+            services.AddSignalR(e => {
+                e.MaximumReceiveMessageSize = 102400000;
+                e.EnableDetailedErrors = true;
+            });
 
 
 

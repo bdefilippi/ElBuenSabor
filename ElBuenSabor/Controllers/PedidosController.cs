@@ -11,6 +11,7 @@ using MercadoPago.Client.Preference;
 using MercadoPago.Resource.Preference;
 using ElBuenSabor.Hubs;
 using Microsoft.AspNetCore.SignalR;
+using Newtonsoft.Json;
 
 namespace ElBuenSabor.Controllers
 {
@@ -84,21 +85,69 @@ namespace ElBuenSabor.Controllers
         [HttpPost]
         public async Task<ActionResult<Pedido>> PostPedido(Pedido pedido)
         {
+                 
             _context.Pedidos.Add(pedido);
             await _context.SaveChangesAsync();
-            //-------notificacion
-
-            await _hubContext
-            .Clients
-            .All
-            .SendAsync("NotificacionPedidoRecibido", "Su pedido esta pendiente de aprobacion");
-
-            //-------fin notificacion
 
             return CreatedAtAction("GetPedido", new { id = pedido.Id }, pedido);
         }
 
-        // POST: api/Pedidos
+
+        // POST: api/Pedidos/Finalizar/5
+        [HttpPost("Finalizar/{id}")]
+        public async Task<ActionResult<Pedido>> FinalizarPedido(long id)
+        {
+            var pedido = GetPedido(id).Result.Value;
+
+            /*
+             Finalizada la carga del pedido el sistema le informara al cliente 
+             cuanto es el tiempo estimado para el retiro o entrega de su pedido, 
+             este tiempo surgirá de la siguiente formula:
+                Σ Sumatoria del tiempo estimado de los artículos manufacturados 
+                  solicitados por el cliente en el pedido actual
+                +
+                Σ Sumatoria del tiempo estimado de los artículos manufacturados 
+                  que se encuentran en la cocina / cantidad cocineros
+                +
+                10 Minutos de entrega por Delivery, solo si corresponde.
+             */
+            SQLToJSON TiempoEstimadoCocinaPedidoActual = new SQLToJSON();
+            SQLToJSON TiempoEstimadoCocinaPedidosConEstado = new SQLToJSON();
+
+            var parametroIdPedidoActual = new Dictionary<String, object>();
+            parametroIdPedidoActual["@IdPedido"] = pedido.Id;
+            TiempoEstimadoCocinaPedidoActual.Agregar("EXECUTE TiempoEstimadoCocinaPedidoActual @IdPedido", parametroIdPedidoActual);
+            TiempoEstimadoCocinaPedidoActual.JSON();
+
+            var parametroEstadoActual = new Dictionary<String, object>();
+            parametroEstadoActual["@estado"] = 0;
+            TiempoEstimadoCocinaPedidosConEstado.Agregar("EXECUTE TiempoEstimadoCocinaPedidosConEstado @estado", parametroEstadoActual);
+            TiempoEstimadoCocinaPedidosConEstado.JSON();
+
+            
+            //agrega la fecha de hoy al pedido
+            pedido.Fecha = DateTime.Now;
+
+            //Agrega fecha estimada de finalizacion
+            dynamic TECocinaPedidoActual = JsonConvert.DeserializeObject(TiempoEstimadoCocinaPedidoActual.JSON());
+            dynamic TECocinaPedidosConEstado = JsonConvert.DeserializeObject(TiempoEstimadoCocinaPedidosConEstado.JSON());
+
+            //FALTA DIVIDIR POR LA CANTIDAD DE COCINEROS
+            long FormulaTE = TECocinaPedidoActual.min + TECocinaPedidosConEstado.min;
+            pedido.HoraEstimadaFin = pedido.Fecha.AddMinutes(FormulaTE);
+            await PutPedido(id, pedido);
+
+            //-------notificacion
+            await _hubContext
+            .Clients.Group(pedido.ClienteID.ToString())
+            //.All
+            .SendAsync("NotificacionPedidoRecibido", "Su pedido esta pendiente de aprobacion", pedido);
+            //-------fin notificacion
+
+            return (pedido);
+        }
+
+        // POST: api/Pedidos/{total}
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost("{total}")]
         public async Task<ActionResult<Preference>> MercadoPago(decimal total)

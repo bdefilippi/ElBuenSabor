@@ -31,7 +31,7 @@ namespace ElBuenSabor.Services
 
         public UsuarioResponse Auth(AuthRequest model)
         {
-            UsuarioResponse usuarioResponse = new UsuarioResponse();
+            UsuarioResponse usuarioResponse = new();
             {
                 string spassword = Encrypt.GetSHA256(model.Clave);
                 var usuario = _context.Usuarios
