@@ -10,24 +10,26 @@ namespace ElBuenSabor.Hubs
     {
         public async Task JoinRolIDToGroup(long rolID)
         {
-            await Groups.AddToGroupAsync(Context.ConnectionId, rolID.ToString());
+            await Groups.AddToGroupAsync(Context.ConnectionId, "R" + rolID.ToString());
         }
 
         public async Task RemoveRolIDFromGroup(long rolID)
         {
-            await Groups.RemoveFromGroupAsync(Context.ConnectionId, rolID.ToString());
+            await Groups.RemoveFromGroupAsync(Context.ConnectionId, "R" + rolID.ToString());
         }
 
 
         public async Task JoinClienteIDToGroup(long clienteID)
         {
-            await Groups.AddToGroupAsync(Context.ConnectionId, clienteID.ToString());
+            await Groups.AddToGroupAsync(Context.ConnectionId, "C" + clienteID.ToString());
         }
 
         public async Task RemoveClienteIDFromGroup(long clienteID)
         {
-            await Groups.RemoveFromGroupAsync(Context.ConnectionId, clienteID.ToString());
+            await Groups.RemoveFromGroupAsync(Context.ConnectionId, "C" + clienteID.ToString());
         }
+
+
 
     }
 }

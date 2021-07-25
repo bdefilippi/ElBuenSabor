@@ -55,6 +55,7 @@ namespace ElBuenSabor.Services
                 usuarioResponse.NombreUsuario = usuario.NombreUsuario;
                 usuarioResponse.Token = GetToken(usuario);
                 usuarioResponse.Rol = usuario.Rol.Nombre;
+                usuarioResponse.RolId = usuario.RolId;
                 usuarioResponse.Cliente = cliente;
             }
             return usuarioResponse;

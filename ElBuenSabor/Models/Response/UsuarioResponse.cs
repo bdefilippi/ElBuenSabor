@@ -11,7 +11,7 @@ namespace ElBuenSabor.Models.Response
         public string Rol { get; set; }
         public string Token { get;  set; }
         public object Cliente { get; set; }
-
+        public long RolId { get; set; }
         /*El papeleo para identificarte es el login
         Una vez hecho el papeleo para identificarte 
         te dan una credencial. Esa credencial se llama

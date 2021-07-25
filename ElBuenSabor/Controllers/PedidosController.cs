@@ -21,6 +21,14 @@ namespace ElBuenSabor.Controllers
     {
         private readonly ElBuenSaborContext _context;
         private readonly IHubContext<NotificacionesAClienteHub> _hubContext;
+        const int PENDIENTE = 0;
+        const int APROBADO = 1;
+        const int LISTO_ENTREGA_LOCAL = 2;
+        const int TERMINADO = 3;
+        const int PENDIENTE_ENTREGA = 4;
+        const int ENTREGADO = 5;
+        const int CANCELADO = 6;
+        const int COCINANDO = 7;
 
         public PedidosController(ElBuenSaborContext context, IHubContext<NotificacionesAClienteHub> notificacionesAClienteHub)
         {
@@ -59,6 +67,11 @@ namespace ElBuenSabor.Controllers
                 return BadRequest();
             }
 
+            Pedido pedidoPrevio = await _context.Pedidos.AsNoTracking().FirstOrDefaultAsync(x=>x.Id==id);
+            int estadoPrevio = pedidoPrevio.Estado;
+            int estadoActual = pedido.Estado;
+
+
             _context.Entry(pedido).State = EntityState.Modified;
 
             try
@@ -77,7 +90,103 @@ namespace ElBuenSabor.Controllers
                 }
             }
 
+            String mensaje="";
+            String grupoDestino="";
+            var cambio = (a: estadoPrevio, b: estadoActual);
+                        
+            switch (cambio)
+            {
+                case (a: PENDIENTE, b: PENDIENTE):
+                    mensaje = "Su pedido esta pendiente de aprobacion";
+                    grupoDestino =  pedido.ClienteID.ToString();
+                    EnviarNotificacionCliente(grupoDestino, mensaje,pedido);
+                    break;
+
+                case (a: PENDIENTE, b: APROBADO):
+                    mensaje = "Su pedido esta Aprobado";
+                    grupoDestino = pedido.ClienteID.ToString();
+                    EnviarNotificacionCliente(grupoDestino, mensaje, pedido);
+
+                    mensaje = "Ingresó pedido a cocinar";
+                    grupoDestino = _context.Roles.Where(r=>r.Nombre=="Cocinero").FirstOrDefault().Id.ToString() ;
+                    EnviarNotificacionRol(grupoDestino, mensaje, pedido);
+                    break;
+
+                case (a: PENDIENTE, b: CANCELADO):
+                    mensaje = "Su pedido fue Cancelado";
+                    grupoDestino = pedido.ClienteID.ToString();
+                    EnviarNotificacionCliente(grupoDestino, mensaje, pedido);
+                    break;
+
+                case (a: CANCELADO, b: PENDIENTE):
+                    mensaje = "Su pedido esta pendiente de aprobacion";
+                    grupoDestino = pedido.ClienteID.ToString();
+                    EnviarNotificacionCliente(grupoDestino, mensaje, pedido);
+                    break;
+
+                case (a: APROBADO, b: PENDIENTE):
+                    mensaje = "Disculpe, su pedido ha retrocedido a pendiente de aprobacion";
+                    grupoDestino = pedido.ClienteID.ToString();
+                    EnviarNotificacionCliente(grupoDestino, mensaje, pedido);
+
+                    mensaje = "El cajero quitó el pedido de la cocina";
+                    grupoDestino = _context.Roles.Where(r => r.Nombre == "Cocinero").FirstOrDefault().Id.ToString();
+                    EnviarNotificacionRol(grupoDestino, mensaje, pedido);
+                    break;
+
+                case (a: COCINANDO, b: LISTO_ENTREGA_LOCAL):
+                    mensaje = "Su pedido esta Listo para retirar!";
+                    grupoDestino = pedido.ClienteID.ToString();
+                    EnviarNotificacionCliente(grupoDestino, mensaje, pedido);
+
+                    mensaje = "El cocinero terminó el pedido. Retira en local";
+                    grupoDestino = _context.Roles.Where(r => r.Nombre == "Cajero").FirstOrDefault().Id.ToString();
+                    EnviarNotificacionRol(grupoDestino, mensaje, pedido);
+                    break;
+
+                case (a: COCINANDO, b: PENDIENTE_ENTREGA):
+                    mensaje = "Su pedido esta está en camino!";
+                    grupoDestino = pedido.ClienteID.ToString();
+                    EnviarNotificacionCliente(grupoDestino, mensaje, pedido);
+
+                    mensaje = "El cocinero terminó el pedido. Enviar por delivery";
+                    grupoDestino = _context.Roles.Where(r => r.Nombre == "Cajero").FirstOrDefault().Id.ToString();
+                    EnviarNotificacionRol(grupoDestino, mensaje, pedido);
+                    break;
+                
+                case (a: LISTO_ENTREGA_LOCAL, b: ENTREGADO):
+                    mensaje = "Esperamos que disfrute su pedido!";
+                    grupoDestino = pedido.ClienteID.ToString();
+                    EnviarNotificacionCliente(grupoDestino, mensaje, pedido);
+                    break;
+
+                case (a: PENDIENTE_ENTREGA, b: ENTREGADO):
+                    mensaje = "Su pedido fue entregado!";
+                    grupoDestino = pedido.ClienteID.ToString();
+                    EnviarNotificacionCliente(grupoDestino, mensaje, pedido);
+                    break;
+
+                default:
+                    break;
+            }
+
             return NoContent();
+        }
+
+        private void EnviarNotificacionCliente(String grupoDestino, String mensaje, Pedido pedido) { 
+            EnviarNotificacion("C" + grupoDestino, mensaje, pedido);
+        }
+
+        private void EnviarNotificacionRol(String grupoDestino, String mensaje, Pedido pedido)
+        {
+            EnviarNotificacion("R" + grupoDestino, mensaje, pedido);
+        }
+
+        private void EnviarNotificacion(String grupoDestino,String mensaje,Pedido pedido)
+        {
+            _hubContext
+            .Clients.Group(grupoDestino)
+            .SendAsync("Notificacion", mensaje, pedido);
         }
 
         // POST: api/Pedidos
@@ -97,7 +206,7 @@ namespace ElBuenSabor.Controllers
         [HttpPost("Finalizar/{id}")]
         public async Task<ActionResult<Pedido>> FinalizarPedido(long id)
         {
-            var pedido = GetPedido(id).Result.Value;
+            Pedido pedido = GetPedido(id).Result.Value;
 
             /*
              Finalizada la carga del pedido el sistema le informara al cliente 
@@ -138,10 +247,12 @@ namespace ElBuenSabor.Controllers
             await PutPedido(id, pedido);
 
             //-------notificacion
-            await _hubContext
-            .Clients.Group(pedido.ClienteID.ToString())
-            //.All
-            .SendAsync("NotificacionPedidoRecibido", "Su pedido esta pendiente de aprobacion", pedido);
+            String mensaje = "";
+            String grupoDestino = "";
+
+            mensaje = "Ha ingresado un nuevo pedido";
+            grupoDestino = _context.Roles.Where(r => r.Nombre == "Cajero").FirstOrDefault().Id.ToString();
+            EnviarNotificacionRol(grupoDestino, mensaje, pedido);
             //-------fin notificacion
 
             return (pedido);
