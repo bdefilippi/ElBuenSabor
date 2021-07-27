@@ -7,9 +7,8 @@ using System.Threading.Tasks;
 
 namespace ElBuenSabor.Services
 {
-    public interface IUsuarioService
+    public interface IAuthService
     {
-
-        UsuarioResponse Auth(AuthRequest model);
+        AuthResponse Authorize(AuthRequest model);
     }
 }

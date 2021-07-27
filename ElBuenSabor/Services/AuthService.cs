@@ -17,26 +17,27 @@ using System.Threading.Tasks;
 
 namespace ElBuenSabor.Services
 {
-    public class UsuarioService : IUsuarioService
+    public class AuthService : IAuthService
     {
 
         private readonly JwtSettings _JwtSettings;
+        
         private readonly ElBuenSaborContext _context;
 
-        public UsuarioService(JwtSettings JwtSettings, ElBuenSaborContext context)
+        public AuthService(JwtSettings JwtSettings, ElBuenSaborContext context)
         {
             _JwtSettings = JwtSettings;
             _context = context;
         }
 
-        public UsuarioResponse Auth(AuthRequest model)
+        public AuthResponse Authorize(AuthRequest authRequest)
         {
-            UsuarioResponse usuarioResponse = new();
+            AuthResponse authResponse = new();
             {
-                string spassword = Encrypt.GetSHA256(model.Clave);
+                string spassword = Encrypt.GetSHA256(authRequest.Clave);
                 var usuario = _context.Usuarios
                     .Include(r => r.Rol)
-                    .Where(u => u.NombreUsuario == model.NombreUsuario && u.Clave == spassword)
+                    .Where(u => u.NombreUsuario == authRequest.NombreUsuario && u.Clave == spassword)
                     .FirstOrDefault();
                 if (usuario == null) return null;
 
@@ -48,20 +49,20 @@ namespace ElBuenSabor.Services
                         nombre = c.Nombre,
                         apellido = c.Apellido,
                         telefono = c.Telefono,
-                        domicilios=c.Domicilios
+                        domicilios = c.Domicilios
                     })
                     .FirstOrDefault();
 
-                usuarioResponse.NombreUsuario = usuario.NombreUsuario;
-                usuarioResponse.Token = GetToken(usuario);
-                usuarioResponse.Rol = usuario.Rol.Nombre;
-                usuarioResponse.RolId = usuario.RolId;
-                usuarioResponse.Cliente = cliente;
+                authResponse.NombreUsuario = usuario.NombreUsuario;
+                authResponse.Token = CreateUserAuthToken(usuario);
+                authResponse.Rol = usuario.Rol.Nombre;
+                authResponse.RolId = usuario.RolId;
+                authResponse.Cliente = cliente;
             }
-            return usuarioResponse;
+            return authResponse;
         }
 
-        private string GetToken(Usuario usuario)
+        private string CreateUserAuthToken(Usuario usuario)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
             var llave = Encoding.ASCII.GetBytes(_JwtSettings.Secreto);

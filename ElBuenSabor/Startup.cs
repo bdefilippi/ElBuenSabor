@@ -21,6 +21,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using ElBuenSabor.Hubs;
 
+
 namespace ElBuenSabor
 {
     public class Startup
@@ -84,13 +85,38 @@ namespace ElBuenSabor
             }
              );
 
+            /* Google y su OAuthorization */
+
+            // Es buena practica crear un objeto que tome los valores de appsetting.json
+            // y luego acceder a esos valores por medio del objeto, parece que por seguridad
+            var GoogleAuthSettings = new GoogleAuthSettings();
+            Configuration.Bind(key: nameof(GoogleAuthSettings), GoogleAuthSettings);
+
+            services.AddSingleton(GoogleAuthSettings);
+
+            //Password comun para los usuarios logeados con google
+            var CommonPassSettings = new CommonPassSettings();
+            Configuration.Bind(key: nameof(CommonPassSettings), CommonPassSettings);
+
+            services.AddSingleton(CommonPassSettings);
+
+            services.AddAuthentication().AddGoogle(googleOptions =>
+            {
+                IConfigurationSection googleAuthNSection =
+                Configuration.GetSection("Authentication:Google"); //mmm ver, me parece que no apunta a nada
+
+                
+                googleOptions.ClientId = GoogleAuthSettings.ClientId; // ver appsettings.json
+                googleOptions.ClientSecret = GoogleAuthSettings.ClientSecret; 
+            });
+
             /*
              Permite que mediante el contructor de una clase, se pueda inyectar la dependencia
-            IUsuarioService
+            IAuthService
             The AddScoped method registers the service with a scoped lifetime,
             the lifetime of a single request. 
              */
-            services.AddScoped<IUsuarioService, UsuarioService>();
+            services.AddScoped<IAuthService, AuthService>();
 
             //-----------jwt
 
@@ -149,7 +175,6 @@ namespace ElBuenSabor
                 endpoints.MapHub<NotificacionesAClienteHub>("/notificacionesHub");
                 endpoints.MapControllers();
             });
-
 
 
         }

@@ -9,6 +9,8 @@ using ElBuenSabor.Models;
 using ElBuenSabor.Models.Request;
 using ElBuenSabor.Services;
 using ElBuenSabor.Models.Response;
+using Google.Apis.Auth;
+using ElBuenSabor.Tools;
 
 namespace ElBuenSabor.Controllers
 {
@@ -24,12 +26,12 @@ namespace ElBuenSabor.Controllers
         en algun momento la logica de autenticacion. Solo cambiando la clase en Startup que
         implementa la interface y la inyecta es suficiente para cambiar el tipo de autenticacion
          */
-        private readonly IUsuarioService _usuarioService;
+        private readonly IAuthService _authService;
         
-        public UsuariosController(ElBuenSaborContext context, IUsuarioService usuarioService)
+        public UsuariosController(ElBuenSaborContext context, IAuthService authService)
         {
             _context = context;
-            _usuarioService = usuarioService;
+            _authService = authService;
         }
 
         // GET: api/Usuarios
@@ -116,22 +118,8 @@ namespace ElBuenSabor.Controllers
             return _context.Usuarios.Any(e => e.Id == id);
         }
 
-        //-------------------- autenticacion--------------
-        [HttpPost("login")]
-        public IActionResult Autentificar([FromBody] AuthRequest model )
-        {
 
-            //quiero que genere un usuarioResponse cuando se autentifique
-            var usuarioResponse = _usuarioService.Auth(model);
 
-            if (usuarioResponse == null)
-            {
-                return BadRequest("Usuario o contraseña incorrecta");
-            }
-            return Ok(usuarioResponse);
-
-        }
-        //----------------------fin autenticacion--------------------------
 
     }
 }

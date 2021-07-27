@@ -29,7 +29,5 @@ namespace ElBuenSabor.Hubs
             await Groups.RemoveFromGroupAsync(Context.ConnectionId, "C" + clienteID.ToString());
         }
 
-
-
     }
 }
