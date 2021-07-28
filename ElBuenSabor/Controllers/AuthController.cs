@@ -123,7 +123,43 @@ namespace ElBuenSabor.Controllers
             return StatusCode(500);
 
         }
-        //----------------------fin autenticacion--------------------------
+        //----------------------Fin Google autenticacion--------------------------
+
+
+        [HttpPost("RegistrarCliente")]
+        public IActionResult RegistrarCliente([FromBody] RegistroRequest registroRequest)
+        {
+
+            Usuario usuarioNuevo = new();
+            Cliente clienteNuevo = new();
+            try
+            {
+
+                //***REGISTRER...***
+                //Agregamos el usuario nuevo
+                usuarioNuevo.NombreUsuario = registroRequest.Email;
+                string hashCommonPassword = Encrypt.GetSHA256(registroRequest.Clave);
+                usuarioNuevo.Clave = hashCommonPassword;
+                usuarioNuevo.RolId = 1; //Corresponde al Cliente en la base de datos de Roles
+                _context.Usuarios.Add(usuarioNuevo);
+                _context.SaveChanges(); //Debería hacerse de forma asincrona, cambiar eso
+
+                //Luego agregamos el cliente nuevo
+                clienteNuevo.Nombre = registroRequest.Nombre;
+                clienteNuevo.Apellido = registroRequest.Apellido;
+                clienteNuevo.Telefono = registroRequest.Telefono;
+                clienteNuevo.UsuarioID = usuarioNuevo.Id;
+                _context.Clientes.Add(clienteNuevo);
+                _context.SaveChanges(); //Debería hacerse de forma asincrona, cambiar eso
+
+            }
+            catch
+            {
+                return StatusCode(500, "Error al Registrarse");
+            }
+            return Ok(new { clienteNuevo, usuarioNuevo });
+
+        }
 
     }
 }
