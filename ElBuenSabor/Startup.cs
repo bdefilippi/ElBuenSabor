@@ -125,8 +125,13 @@ namespace ElBuenSabor
               The proper solution is to implement your own hub between client and server and process in chunks and stick it together.
               refer to : https://docs.microsoft.com/en-us/aspnet/core/signalr/streaming?view=aspnetcore-3.1
              */
+
+            SignalRGroups signalRGroups = new();
+
+            services.AddSingleton(signalRGroups);
+
             services.AddSignalR(e => {
-                e.MaximumReceiveMessageSize = 102400000;
+                //e.MaximumReceiveMessageSize = 102400000;
                 e.EnableDetailedErrors = true;
             });
 

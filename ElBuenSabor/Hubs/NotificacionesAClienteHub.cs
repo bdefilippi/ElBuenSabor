@@ -8,6 +8,8 @@ namespace ElBuenSabor.Hubs
 {
     public class NotificacionesAClienteHub: Hub
     {
+        private readonly SignalRGroups _signalRGroups;
+
         public async Task JoinRolIDToGroup(long rolID)
         {
             await Groups.AddToGroupAsync(Context.ConnectionId, "R" + rolID.ToString());
@@ -16,6 +18,7 @@ namespace ElBuenSabor.Hubs
         public async Task RemoveRolIDFromGroup(long rolID)
         {
             await Groups.RemoveFromGroupAsync(Context.ConnectionId, "R" + rolID.ToString());
+
         }
 
 

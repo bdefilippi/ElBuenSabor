@@ -47,7 +47,12 @@ namespace ElBuenSabor.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<Pedido>> GetPedido(long id)
         {
-            var pedido = await _context.Pedidos.FindAsync(id);
+
+            var pedido = await _context.Pedidos
+                .Include(p => p.DetallesPedido)
+                .ThenInclude(d=>d.Articulo)
+                .FirstOrDefaultAsync(c => c.Id == id);
+
 
             if (pedido == null)
             {
@@ -242,6 +247,7 @@ namespace ElBuenSabor.Controllers
             dynamic TECocinaPedidosConEstado = JsonConvert.DeserializeObject(TiempoEstimadoCocinaPedidosConEstado.JSON());
 
             //FALTA DIVIDIR POR LA CANTIDAD DE COCINEROS
+            
             long FormulaTE = TECocinaPedidoActual.min + TECocinaPedidosConEstado.min;
             pedido.HoraEstimadaFin = pedido.Fecha.AddMinutes(FormulaTE);
             await PutPedido(id, pedido);
