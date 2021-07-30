@@ -21,6 +21,8 @@ namespace ElBuenSabor.Controllers
     {
         private readonly ElBuenSaborContext _context;
         private readonly IHubContext<NotificacionesAClienteHub> _hubContext;
+        private readonly SignalRGroups _signalRGroups;
+
         const int PENDIENTE = 0;
         const int APROBADO = 1;
         const int LISTO_ENTREGA_LOCAL = 2;
@@ -30,10 +32,11 @@ namespace ElBuenSabor.Controllers
         const int CANCELADO = 6;
         const int COCINANDO = 7;
 
-        public PedidosController(ElBuenSaborContext context, IHubContext<NotificacionesAClienteHub> notificacionesAClienteHub)
+        public PedidosController(ElBuenSaborContext context, IHubContext<NotificacionesAClienteHub> notificacionesAClienteHub, SignalRGroups signalRGroups)
         {
             _context = context;
             _hubContext = notificacionesAClienteHub;
+            _signalRGroups = signalRGroups;
         }
 
         // GET: api/Pedidos
@@ -52,7 +55,6 @@ namespace ElBuenSabor.Controllers
                 .Include(p => p.DetallesPedido)
                 .ThenInclude(d=>d.Articulo)
                 .FirstOrDefaultAsync(c => c.Id == id);
-
 
             if (pedido == null)
             {
@@ -246,9 +248,16 @@ namespace ElBuenSabor.Controllers
             dynamic TECocinaPedidoActual = JsonConvert.DeserializeObject(TiempoEstimadoCocinaPedidoActual.JSON());
             dynamic TECocinaPedidosConEstado = JsonConvert.DeserializeObject(TiempoEstimadoCocinaPedidosConEstado.JSON());
 
-            //FALTA DIVIDIR POR LA CANTIDAD DE COCINEROS
+            long FormulaTE;
+            if (_signalRGroups.Cocineros == 0)
+            {
+                FormulaTE = 9999999;
+            }
+            else 
+            {
+                FormulaTE= TECocinaPedidoActual.min + TECocinaPedidosConEstado.min / _signalRGroups.Cocineros;
+            }
             
-            long FormulaTE = TECocinaPedidoActual.min + TECocinaPedidosConEstado.min;
             pedido.HoraEstimadaFin = pedido.Fecha.AddMinutes(FormulaTE);
             await PutPedido(id, pedido);
 

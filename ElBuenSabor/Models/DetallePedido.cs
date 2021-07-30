@@ -17,6 +17,7 @@ namespace ElBuenSabor.Models
         public Pedido Pedido { get; set; }
         public long ArticuloID { get; set; }
         public Articulo Articulo { get; set; }
+        public int Estado { get; set; }
 
     }
 }

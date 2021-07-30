@@ -131,7 +131,7 @@ namespace ElBuenSabor
             services.AddSingleton(signalRGroups);
 
             services.AddSignalR(e => {
-                //e.MaximumReceiveMessageSize = 102400000;
+                e.MaximumReceiveMessageSize = 102400000;
                 e.EnableDetailedErrors = true;
             });
 

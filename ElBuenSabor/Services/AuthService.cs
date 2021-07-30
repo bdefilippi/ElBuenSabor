@@ -58,6 +58,7 @@ namespace ElBuenSabor.Services
                 authResponse.Rol = usuario.Rol.Nombre;
                 authResponse.RolId = usuario.RolId;
                 authResponse.Cliente = cliente;
+
             }
             return authResponse;
         }
