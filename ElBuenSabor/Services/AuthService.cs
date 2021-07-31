@@ -53,11 +53,21 @@ namespace ElBuenSabor.Services
                     })
                     .FirstOrDefault();
 
-                authResponse.NombreUsuario = usuario.NombreUsuario;
+                authResponse.Usuario.NombreUsuario = usuario.NombreUsuario;
+                authResponse.Usuario.Rol = usuario.Rol.Nombre;
+                authResponse.Usuario.RolId = usuario.RolId;
+
                 authResponse.Token = CreateUserAuthToken(usuario);
-                authResponse.Rol = usuario.Rol.Nombre;
-                authResponse.RolId = usuario.RolId;
-                authResponse.Cliente = cliente;
+
+                if (cliente != null)
+                {
+                    authResponse.Cliente.id = cliente.id;
+                    authResponse.Cliente.nombre = cliente.nombre;
+                    authResponse.Cliente.apellido = cliente.apellido;
+                    authResponse.Cliente.telefono = cliente.telefono;
+                    authResponse.Cliente.domicilios = cliente.domicilios;
+                }
+               
 
             }
             return authResponse;
