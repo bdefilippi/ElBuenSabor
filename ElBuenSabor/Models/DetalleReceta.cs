@@ -13,6 +13,7 @@ namespace ElBuenSabor.Models
         public Articulo Articulo { get; set; }
         public long RecetaID { get; set; }
         public Receta Receta { get; set; }
+        public bool Disabled { get; set; }
 
 
     }
