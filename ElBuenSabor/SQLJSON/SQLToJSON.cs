@@ -14,6 +14,11 @@ namespace ElBuenSabor
     {
         private String jSON;
 
+        public void Agregar(String propiedad, String SQLquery, Dictionary<string, object> parametros,bool ForceArray )
+        {
+            jSON += "{" + "\"" + propiedad + "\"" + ": [" + SQLQuery(SQLquery, parametros) + "]}"; //  Arma  { "propiedad":[{},{},{}] }
+        }
+
         public void Agregar(String propiedad, String SQLquery, Dictionary<string, object> parametros)
         {
             jSON += "{" + "\"" + propiedad + "\"" + ":" + SQLQuery(SQLquery, parametros) + "}"; //  Arma  { "propiedad":[{},{},{}] }
@@ -31,7 +36,8 @@ namespace ElBuenSabor
 
         public string JSON()
         {
-            return jSON.Replace("}{", ","); // Une los objetos quitando las divisiones interrnas
+            
+            return jSON.Replace("}{", ",").Replace("[[", "[").Replace("]]", "]"); // Une los objetos quitando las divisiones interrnas
         }
 
         public static String SQLQuery(string queryString, Dictionary<string, object> parametros = null)

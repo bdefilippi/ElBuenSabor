@@ -13,7 +13,10 @@ namespace ElBuenSabor.Hubs
         public NotificacionesAClienteHub(SignalRGroups signalRGroups)
         {
             _signalRGroups = signalRGroups;
+            //Clients.Users()
         }
+
+
 
         public async Task JoinRolIDToGroup(long rolID)
         {

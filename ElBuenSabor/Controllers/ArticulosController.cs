@@ -143,7 +143,7 @@ namespace ElBuenSabor.Controllers
             var parametros = new Dictionary<String, object>();
             parametros["@pricePoint"] = id;
             ArticuloParaFront.Agregar("EXECUTE ArticuloParaFront @pricePoint", parametros);
-            ArticuloParaFront.Agregar("ingredientes", "EXECUTE IngredientesParaFront @pricePoint", parametros);
+            ArticuloParaFront.Agregar("ingredientes", "EXECUTE IngredientesParaFront @pricePoint", parametros, true);
             return ArticuloParaFront.JSON();
         }
 
