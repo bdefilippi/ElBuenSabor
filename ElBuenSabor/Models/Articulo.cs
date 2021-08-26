@@ -20,6 +20,7 @@ namespace ElBuenSabor.Models
         public double StockMinimo { get; set; }
         [NotMapped]
         public double StockActual { get; set; }
+        public bool EsManufacturado { get; set; }
         public bool ALaVenta { get; set; }
         public bool Disabled { get; set; }
         public long RubroArticuloID { get; set; }
@@ -29,7 +30,7 @@ namespace ElBuenSabor.Models
         public ICollection<DetalleReceta> DetallesRecetas { get; set; }
         public ICollection<Stock> Stocks { get; set; }
         public ICollection<DetallePedido> DetallesPedidos { get; set; }
-        public ICollection<DetalleFactura> DetallesFacturas { get; set; }
+        
 
     }
 }

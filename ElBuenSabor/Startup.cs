@@ -136,9 +136,9 @@ namespace ElBuenSabor
             });
 
             //Din't work to avoid object cycles
-            services.AddControllers().AddJsonOptions(options =>
-    options.JsonSerializerOptions.MaxDepth = 1
-);
+            //services.AddControllers().AddJsonOptions(options =>
+            //    options.JsonSerializerOptions.MaxDepth = 2
+            //);
             
 
 

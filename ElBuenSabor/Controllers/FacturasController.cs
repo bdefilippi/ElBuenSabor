@@ -41,6 +41,30 @@ namespace ElBuenSabor.Controllers
             return factura;
         }
 
+
+        // GET: api/Facturas/Pedido/5
+        [HttpGet("Pedido/{id}")]
+        public async Task<ActionResult<Factura>> GetFacturaDePedido(long id)
+        {
+            var factura = await _context.Facturas.Where(f=>f.PedidoId==id).FirstOrDefaultAsync();
+
+            if (factura == null)
+            {
+                return NotFound();
+            }
+
+            return factura;
+        }
+
+        // GET: api/Facturas/PedidoExiste/5
+        [HttpGet("PedidoExiste/{id}")]
+        public async Task<ActionResult<Boolean>> GetFacturaDePedidoExiste(long id)
+        {
+            return await _context.Facturas.Where(f => f.PedidoId == id).AnyAsync();
+
+        }
+
+
         // PUT: api/Facturas/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
