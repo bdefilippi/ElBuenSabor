@@ -14,7 +14,6 @@ namespace ElBuenSabor.Models
         public int Estado { get; set; }
         public DateTime HoraEstimadaFin { get; set; }
         public int TipoEnvio { get; set; }
-        public String FormaPago { get; set; }
         [NotMapped]
         public double Total { get; set; }
         public long ClienteID { get; set; }
