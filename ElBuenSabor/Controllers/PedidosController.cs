@@ -13,6 +13,10 @@ using ElBuenSabor.Hubs;
 using Microsoft.AspNetCore.SignalR;
 using Newtonsoft.Json;
 using ElBuenSabor.Models.Response;
+using System.Web;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Net;
 
 namespace ElBuenSabor.Controllers
 {
@@ -24,6 +28,7 @@ namespace ElBuenSabor.Controllers
         private readonly IHubContext<NotificacionesAClienteHub> _hubContext;
         private readonly SignalRGroups _signalRGroups;
 
+        const int PAGO_PENDIENTE_MP = -1;
         const int PENDIENTE = 0;
         const int APROBADO = 1;
         const int LISTO_ENTREGA_LOCAL = 2;
@@ -32,6 +37,10 @@ namespace ElBuenSabor.Controllers
         const int ENTREGADO = 5;
         const int CANCELADO = 6;
         const int COCINANDO = 7;
+
+        const int LOCAL = 0;
+        const int DOMICILIO = 1;
+    
 
         public PedidosController(ElBuenSaborContext context, IHubContext<NotificacionesAClienteHub> notificacionesAClienteHub, SignalRGroups signalRGroups)
         {
@@ -44,7 +53,13 @@ namespace ElBuenSabor.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Pedido>>> GetPedidos()
         {
-            return await _context.Pedidos.ToListAsync();
+            var pedidos = await _context.Pedidos.Include(d=>d.DetallesPedido).ToListAsync();
+            foreach (Pedido pedido in pedidos)
+            {
+                pedido.Total = PedidoTotalCalcular(pedido);
+            }
+
+            return pedidos;
         }
 
         // GET: api/Pedidos/5
@@ -56,6 +71,8 @@ namespace ElBuenSabor.Controllers
                 .Include(p => p.DetallesPedido)
                 .ThenInclude(d=>d.Articulo)
                 .FirstOrDefaultAsync(c => c.Id == id);
+
+            PedidoTotalModificar(ref pedido);
 
             if (pedido == null)
             {
@@ -98,17 +115,26 @@ namespace ElBuenSabor.Controllers
                 }
             }
 
-            String mensaje="";
+            var pedidoParaDTO = await _context.Pedidos
+            .Include(p => p.DetallesPedido)
+            .ThenInclude(d => d.Articulo)
+            .Include(p => p.Domicilio)
+            .AsNoTracking()
+            .FirstOrDefaultAsync(c => c.Id == id);
+
+            PedidoTotalModificar(ref pedidoParaDTO);
+
+            String mensaje ="";
             String grupoDestino="";
             PedidoDTO pedidoDTO=new();
-            pedidoDTO.Cliente = pedido.Cliente;
-            pedidoDTO.Domicilio = pedido.Domicilio;
-            pedidoDTO.Estado = pedido.Estado;
-            pedidoDTO.Fecha = pedido.Fecha;
-            pedidoDTO.HoraEstimadaFin = pedido.HoraEstimadaFin;
-            pedidoDTO.Id = pedido.Id;
-            pedidoDTO.TipoEnvio = pedido.TipoEnvio;
-            pedidoDTO.Total= pedido.Total;
+            pedidoDTO.Cliente = pedidoParaDTO.Cliente;
+            pedidoDTO.Domicilio = pedidoParaDTO.Domicilio;
+            pedidoDTO.Estado = pedidoParaDTO.Estado;
+            pedidoDTO.Fecha = pedidoParaDTO.Fecha;
+            pedidoDTO.HoraEstimadaFin = pedidoParaDTO.HoraEstimadaFin;
+            pedidoDTO.Id = pedidoParaDTO.Id;
+            pedidoDTO.TipoEnvio = pedidoParaDTO.TipoEnvio;
+            pedidoDTO.Total= pedidoParaDTO.Total;
 
 
             var cambio = (a: estadoPrevio, b: estadoActual);
@@ -122,14 +148,28 @@ namespace ElBuenSabor.Controllers
                 //    EnviarNotificacionCliente(grupoDestino, mensaje, pedidoDTO);
                 //    break;
 
+                case (a: PAGO_PENDIENTE_MP, b: PENDIENTE):
+                    mensaje = "Su pedido esta pendiente de aprobacion";
+                    grupoDestino = pedido.ClienteID.ToString();
+                    EnviarNotificacionCliente(grupoDestino, mensaje, pedidoDTO);
+
+                    mensaje = "Ha ingresado un nuevo pedido";
+                    grupoDestino = _context.Roles.Where(r => r.Nombre == "Cajero").FirstOrDefault().Id.ToString();
+                    EnviarNotificacionRol(grupoDestino, mensaje, pedidoDTO);
+                    break;
+
                 case (a: PENDIENTE, b: APROBADO):
-                    mensaje = "Su pedido esta Aprobado";
+                    mensaje = "Su pedido esta Aprobado y Facturado";
                     grupoDestino = pedido.ClienteID.ToString();
                     EnviarNotificacionCliente(grupoDestino, mensaje, pedidoDTO);
 
                     mensaje = "Ingresó pedido a cocinar";
                     grupoDestino = _context.Roles.Where(r=>r.Nombre=="Cocinero").FirstOrDefault().Id.ToString() ;
                     EnviarNotificacionRol(grupoDestino, mensaje, pedidoDTO);
+                    
+                    //si se aprueba el pedido, facturar el pedido
+                    Facturar(pedidoParaDTO);
+
                     break;
 
                 case (a: PENDIENTE, b: CANCELADO):
@@ -224,7 +264,7 @@ namespace ElBuenSabor.Controllers
 
         // POST: api/Pedidos/Finalizar/5
         [HttpPost("Finalizar/{id}")]
-        public async Task<ActionResult<Pedido>> FinalizarPedido(long id)
+        public async Task<ActionResult<PedidoDTO>> FinalizarPedido(long id)
         {
 
             var pedido = await _context.Pedidos
@@ -270,7 +310,7 @@ namespace ElBuenSabor.Controllers
             int tiempoEntregaDelivery=0;
 
 
-            //Si el pedido es a domicili, sumar los 10min extras 
+            //Si el pedido es a domicili0, sumar los 10min extras 
             if (pedido.TipoEnvio == 1)
             {
                 tiempoEntregaDelivery = 10;
@@ -287,18 +327,8 @@ namespace ElBuenSabor.Controllers
                 FormulaTE= TECocinaPedidoActual.min + TECocinaPedidosConEstado.min / _signalRGroups.Cocineros + tiempoEntregaDelivery ;
             }
 
-            //Calcular total del pedido (HORRIBLE. EMPROLIJAR)
-            foreach (var detalle in pedido.DetallesPedido)
-            {
-                SQLToJSON ArticuloParaFront = new SQLToJSON();
-                var parametros = new Dictionary<String, object>();
-                parametros["@pricePoint"] = detalle.Articulo.Id;
-                ArticuloParaFront.Agregar("EXECUTE ArticuloParaFront @pricePoint", parametros);
-                string artJson = ArticuloParaFront.JSON(); //.Replace("{{", "{").Replace("}}", "}");
-                dynamic articulo = JsonConvert.DeserializeObject(artJson);
-                float pv = articulo.PrecioVenta;
-                pedido.Total += pv * detalle.Cantidad;
-            }
+            //Calcular total del pedido 
+            PedidoTotalModificar(ref pedido);
 
             pedido.HoraEstimadaFin = pedido.Fecha.AddMinutes(FormulaTE);
             await PutPedido(id, pedido);
@@ -316,24 +346,67 @@ namespace ElBuenSabor.Controllers
             pedidoDTO.TipoEnvio = pedido.TipoEnvio;
             pedidoDTO.Total = pedido.Total;
 
+            //Si NO paga por mercadolibre, su estado es PENDIENTE
+            if (pedidoDTO.Estado != PAGO_PENDIENTE_MP)
+            {
+                mensaje = "Ha ingresado un nuevo pedido";
+                grupoDestino = _context.Roles.Where(r => r.Nombre == "Cajero").FirstOrDefault().Id.ToString();
+                EnviarNotificacionRol(grupoDestino, mensaje, pedidoDTO);
 
-            mensaje = "Ha ingresado un nuevo pedido";
-            grupoDestino = _context.Roles.Where(r => r.Nombre == "Cajero").FirstOrDefault().Id.ToString();
-            EnviarNotificacionRol(grupoDestino, mensaje, pedidoDTO);
+                mensaje = "Su pedido esta pendiente de aprobacion";
+                grupoDestino = pedido.ClienteID.ToString();
+                EnviarNotificacionCliente(grupoDestino, mensaje, pedidoDTO);
 
-            mensaje = "Su pedido esta pendiente de aprobacion";
-            grupoDestino = pedido.ClienteID.ToString();
-            EnviarNotificacionCliente(grupoDestino, mensaje, pedidoDTO);
+
+            }
+            
 
             //-------fin notificacion
 
-            return (pedido);
+            return (pedidoDTO);
         }
 
-        // POST: api/Pedidos/{total}
+        private void Facturar(Pedido pedido)
+        {
+            FacturasController facturasController = new FacturasController (_context);
+
+            bool existeFacturaDelPedido = facturasController.GetFacturaDePedidoExiste(pedido.Id).Result.Value;
+
+            //if (!existeFacturaDelPedido)
+            //{
+                Factura factura = new();
+                factura.Fecha = DateTime.Now;
+                factura.MontoDescuento = Convert.ToSingle(PedidoMontoDescuentoCalcular(pedido));
+                factura.PedidoId = pedido.Id;
+                factura.Total = Convert.ToDecimal(PedidoTotalCalcular(pedido));
+                var rs =  facturasController.PostFactura(factura).Result;
+                Factura fn = (rs.Result as ObjectResult).Value as Factura;
+                
+                foreach (var DP in fn.Pedido.DetallesPedido)
+                {
+                    for (int i = 1; i <= DP.Cantidad; i++)
+                    {
+                        if (DP.Articulo.EsManufacturado)
+                        {
+                            //foreach (var DR in DP.Articulo.Recetas.FirstOrDefault().DetallesRecetas)
+                            //{
+                            //    Egresar(DR.Articulo, DR.Cantidad, DP.Id);
+                            //}
+                        }
+                    }
+                }
+            //}
+        }
+
+        private void Egresar(Articulo articulo, double cantidad, long DFid)
+        {
+            Console.WriteLine("Articulo", articulo.Denominacion, "Cantidad", cantidad, "DFid", DFid);
+        }
+
+        // POST: api/Pedidos/MercadoPagoPreference
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost("{total}")]
-        public async Task<ActionResult<Preference>> MercadoPago(decimal total)
+        [HttpPost("MercadoPagoPreference")]
+        public async Task<ActionResult<Preference>> MercadoPago([FromBody] dynamic preferencia)
         {
 
             MercadoPagoConfig.AccessToken = "TEST-5059945658019779-070913-a1924cb562898b6ed9191db0f41badf6-155784029";
@@ -341,15 +414,24 @@ namespace ElBuenSabor.Controllers
             var request = new PreferenceRequest
             {
                 Items = new List<PreferenceItemRequest>
-    {
-        new PreferenceItemRequest
-        {
-            Title = "Carrito",
-            Quantity = 1,
-            CurrencyId = "ARS",
-            UnitPrice = total,
-        },
-    },
+                {
+                    new PreferenceItemRequest
+                    {
+                        Title = "Carrito",
+                        Quantity = 1,
+                        CurrencyId = "ARS",
+                        UnitPrice = preferencia.total,
+                    },
+                },
+                BackUrls = new PreferenceBackUrlsRequest
+                {
+                    Success = "http://localhost:8080/cliente/Carrito/aprobado",
+                    Failure = "http://localhost:8080/cliente/Carrito/aprobado",
+                    Pending = "http://localhost:8080/cliente/Carrito/aprobado"
+                },
+                ExternalReference = Convert.ToString(preferencia.pedidoId),
+                //no se puede configurar que haga notificaciones a localHost, debe ser una url publica
+                // NotificationUrl = "https://localhost:44350/api/Pedidos/MercadoPagoNotificacion",
             };
 
             // Crea la preferencia usando el client
@@ -359,6 +441,21 @@ namespace ElBuenSabor.Controllers
             return preference;
         }
 
+
+        // POST: api/Pedidos/MercadoPagoNotificacion?topic=payment&id=123456789
+        [HttpPost("MercadoPagoNotificacion")]
+        public async Task<ActionResult<String>> MercadoPagoNotificacion([FromQuery] string topic, [FromQuery] long id)
+        {
+            using var httpClient = new HttpClient();
+
+            httpClient.DefaultRequestHeaders.Authorization =
+             new AuthenticationHeaderValue("Bearer", "TEST-5059945658019779-070913-a1924cb562898b6ed9191db0f41badf6-155784029");
+
+            var result = await httpClient.GetAsync("https://api.mercadopago.com/v1/payments/"+id);
+            Console.WriteLine(result.StatusCode);
+
+            return StatusCode(200);
+        }
 
         // DELETE: api/Pedidos/5
         [HttpDelete("{id}")]
@@ -381,7 +478,56 @@ namespace ElBuenSabor.Controllers
             return _context.Pedidos.Any(e => e.Id == id);
         } 
 
+        private double PedidoMontoDescuentoCalcular(Pedido pedido)
+        {
+            double SumaDeDetallesPedido = 0;
 
+            //Calcular total del pedido 
+            foreach (var detalle in pedido.DetallesPedido)
+            {
+                SumaDeDetallesPedido += Convert.ToDouble(detalle.Subtotal);
+            }
+
+            if (pedido.TipoEnvio == LOCAL)
+            {
+                return SumaDeDetallesPedido * 0.1;
+            }
+
+            return 0;
+        }
+
+        private double PedidoTotalCalcular(Pedido pedido)
+        {
+            double Total=0;
+            double SumaDeDetallesPedido = 0;
+
+            //no deberia ocurrir
+            if (pedido.DetallesPedido==null)
+            {
+                return 0;
+            }
+
+            //Calcular total del pedido 
+            foreach (var detalle in pedido.DetallesPedido)
+            {
+                SumaDeDetallesPedido += Convert.ToDouble(detalle.Subtotal);
+            }
+
+            Total = SumaDeDetallesPedido;
+
+            if (pedido.TipoEnvio==LOCAL)
+            {
+                Total = SumaDeDetallesPedido * 0.9;
+            }
+
+            return Total;
+
+        }
+
+        private void PedidoTotalModificar(ref Pedido pedido)
+        {
+            pedido.Total=PedidoTotalCalcular(pedido);
+        }
 
     }
 }

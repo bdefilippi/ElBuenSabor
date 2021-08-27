@@ -10,8 +10,7 @@ namespace ElBuenSabor.Models
     {
         public long Id { get; set; }
         public int Cantidad { get; set; }
-        [NotMapped]
-        public double Subtotal { get; set; }
+        public decimal Subtotal { get; set; }
         public bool Disabled { get; set; }
         public long PedidoID { get; set; }
         public Pedido Pedido { get; set; }
