@@ -18,5 +18,6 @@ namespace ElBuenSabor.Models
         [NotMapped]
         public double TotalCosto { get; set; }
         public decimal Total { get; set; }
+        public ICollection<DetalleFactura> DetallesFactura { get; set; }    //Es composicion
     }
 }
