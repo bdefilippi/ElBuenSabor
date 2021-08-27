@@ -9,8 +9,7 @@ namespace ElBuenSabor.Controllers
 {
     public class ElBuenSaborContext : DbContext
     {
-        public ElBuenSaborContext(DbContextOptions<ElBuenSaborContext> options)
-            : base(options)
+        public ElBuenSaborContext(DbContextOptions<ElBuenSaborContext> options): base(options)
         {
 
         }
@@ -30,7 +29,6 @@ namespace ElBuenSabor.Controllers
                 .WithMany(s => s.DetallesFactura)
                 .HasForeignKey(t => t.FacturaID)
                 .OnDelete(DeleteBehavior.Cascade);
-
 
             //Receta - Articulo (composicion)
             modelBuilder.Entity<Receta>()
@@ -89,8 +87,8 @@ namespace ElBuenSabor.Controllers
         public DbSet<Articulo> Articulos { get; set; }
         public DbSet<Cliente> Clientes { get; set; }
         public DbSet<Configuracion> Configuraciones { get; set; }
-        public DbSet<DetalleFactura> DetallesFacturas { get; set; }
         public DbSet<DetallePedido> DetallesPedidos { get; set; }
+        public DbSet<DetalleFactura> DetallesFacturas { get; set; }
         public DbSet<DetalleReceta> DetallesRecetas { get; set; }
         public DbSet<Domicilio> Domicilios { get; set; }
         public DbSet<EgresoArticulo> EgresosArticulos { get; set; }

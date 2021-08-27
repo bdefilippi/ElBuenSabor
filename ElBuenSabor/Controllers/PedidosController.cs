@@ -6,6 +6,17 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ElBuenSabor.Models;
+using MercadoPago.Config;
+using MercadoPago.Client.Preference;
+using MercadoPago.Resource.Preference;
+using ElBuenSabor.Hubs;
+using Microsoft.AspNetCore.SignalR;
+using Newtonsoft.Json;
+using ElBuenSabor.Models.Response;
+using System.Web;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Net;
 
 namespace ElBuenSabor.Controllers
 {
@@ -14,24 +25,54 @@ namespace ElBuenSabor.Controllers
     public class PedidosController : ControllerBase
     {
         private readonly ElBuenSaborContext _context;
+        private readonly IHubContext<NotificacionesAClienteHub> _hubContext;
+        private readonly SignalRGroups _signalRGroups;
 
-        public PedidosController(ElBuenSaborContext context)
+        const int PAGO_PENDIENTE_MP = -1;
+        const int PENDIENTE = 0;
+        const int APROBADO = 1;
+        const int LISTO_ENTREGA_LOCAL = 2;
+        const int TERMINADO = 3;
+        const int PENDIENTE_ENTREGA = 4;
+        const int ENTREGADO = 5;
+        const int CANCELADO = 6;
+        const int COCINANDO = 7;
+
+        const int LOCAL = 0;
+        const int DOMICILIO = 1;
+    
+
+        public PedidosController(ElBuenSaborContext context, IHubContext<NotificacionesAClienteHub> notificacionesAClienteHub, SignalRGroups signalRGroups)
         {
             _context = context;
+            _hubContext = notificacionesAClienteHub;
+            _signalRGroups = signalRGroups;
         }
 
         // GET: api/Pedidos
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Pedido>>> GetPedidos()
         {
-            return await _context.Pedidos.ToListAsync();
+            var pedidos = await _context.Pedidos.Include(d=>d.DetallesPedido).ToListAsync();
+            foreach (Pedido pedido in pedidos)
+            {
+                pedido.Total = PedidoTotalCalcular(pedido);
+            }
+
+            return pedidos;
         }
 
         // GET: api/Pedidos/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Pedido>> GetPedido(long id)
         {
-            var pedido = await _context.Pedidos.FindAsync(id);
+
+            var pedido = await _context.Pedidos
+                .Include(p => p.DetallesPedido)
+                .ThenInclude(d=>d.Articulo)
+                .FirstOrDefaultAsync(c => c.Id == id);
+
+            PedidoTotalModificar(ref pedido);
 
             if (pedido == null)
             {
@@ -51,6 +92,11 @@ namespace ElBuenSabor.Controllers
                 return BadRequest();
             }
 
+            Pedido pedidoPrevio = await _context.Pedidos.AsNoTracking().FirstOrDefaultAsync(x=>x.Id==id);
+            int estadoPrevio = pedidoPrevio.Estado;
+            int estadoActual = pedido.Estado;
+
+
             _context.Entry(pedido).State = EntityState.Modified;
 
             try
@@ -69,7 +115,138 @@ namespace ElBuenSabor.Controllers
                 }
             }
 
+            var pedidoParaDTO = await _context.Pedidos
+            .Include(p => p.DetallesPedido)
+            .ThenInclude(d => d.Articulo)
+            .Include(p => p.Domicilio)
+            .AsNoTracking()
+            .FirstOrDefaultAsync(c => c.Id == id);
+
+            PedidoTotalModificar(ref pedidoParaDTO);
+
+            String mensaje ="";
+            String grupoDestino="";
+            PedidoDTO pedidoDTO=new();
+            pedidoDTO.Cliente = pedidoParaDTO.Cliente;
+            pedidoDTO.Domicilio = pedidoParaDTO.Domicilio;
+            pedidoDTO.Estado = pedidoParaDTO.Estado;
+            pedidoDTO.Fecha = pedidoParaDTO.Fecha;
+            pedidoDTO.HoraEstimadaFin = pedidoParaDTO.HoraEstimadaFin;
+            pedidoDTO.Id = pedidoParaDTO.Id;
+            pedidoDTO.TipoEnvio = pedidoParaDTO.TipoEnvio;
+            pedidoDTO.Total= pedidoParaDTO.Total;
+
+
+            var cambio = (a: estadoPrevio, b: estadoActual);
+                        
+            switch (cambio)
+            {
+                // This case would be handle by FinalizarPedido
+                //case (a: PENDIENTE, b: PENDIENTE):
+                //    mensaje = "Su pedido esta pendiente de aprobacion";
+                //    grupoDestino =  pedido.ClienteID.ToString();
+                //    EnviarNotificacionCliente(grupoDestino, mensaje, pedidoDTO);
+                //    break;
+
+                case (a: PAGO_PENDIENTE_MP, b: PENDIENTE):
+                    mensaje = "Su pedido esta pendiente de aprobacion";
+                    grupoDestino = pedido.ClienteID.ToString();
+                    EnviarNotificacionCliente(grupoDestino, mensaje, pedidoDTO);
+
+                    mensaje = "Ha ingresado un nuevo pedido";
+                    grupoDestino = _context.Roles.Where(r => r.Nombre == "Cajero").FirstOrDefault().Id.ToString();
+                    EnviarNotificacionRol(grupoDestino, mensaje, pedidoDTO);
+                    break;
+
+                case (a: PENDIENTE, b: APROBADO):
+                    mensaje = "Su pedido esta Aprobado y Facturado";
+                    grupoDestino = pedido.ClienteID.ToString();
+                    EnviarNotificacionCliente(grupoDestino, mensaje, pedidoDTO);
+
+                    mensaje = "Ingresó pedido a cocinar";
+                    grupoDestino = _context.Roles.Where(r=>r.Nombre=="Cocinero").FirstOrDefault().Id.ToString() ;
+                    EnviarNotificacionRol(grupoDestino, mensaje, pedidoDTO);
+                    
+                    //si se aprueba el pedido, facturar el pedido
+                    Facturar(pedidoParaDTO);
+
+                    break;
+
+                case (a: PENDIENTE, b: CANCELADO):
+                    mensaje = "Su pedido fue Cancelado";
+                    grupoDestino = pedido.ClienteID.ToString();
+                    EnviarNotificacionCliente(grupoDestino, mensaje, pedidoDTO);
+                    break;
+
+                case (a: CANCELADO, b: PENDIENTE):
+                    mensaje = "Su pedido esta pendiente de aprobacion";
+                    grupoDestino = pedido.ClienteID.ToString();
+                    EnviarNotificacionCliente(grupoDestino, mensaje, pedidoDTO);
+                    break;
+
+                case (a: APROBADO, b: PENDIENTE):
+                    mensaje = "Disculpe, su pedido ha retrocedido a pendiente de aprobacion";
+                    grupoDestino = pedido.ClienteID.ToString();
+                    EnviarNotificacionCliente(grupoDestino, mensaje, pedidoDTO);
+
+                    mensaje = "El cajero quitó el pedido de la cocina";
+                    grupoDestino = _context.Roles.Where(r => r.Nombre == "Cocinero").FirstOrDefault().Id.ToString();
+                    EnviarNotificacionRol(grupoDestino, mensaje, pedidoDTO);
+                    break;
+
+                case (a: COCINANDO, b: LISTO_ENTREGA_LOCAL):
+                    mensaje = "Su pedido esta Listo para retirar!";
+                    grupoDestino = pedido.ClienteID.ToString();
+                    EnviarNotificacionCliente(grupoDestino, mensaje, pedidoDTO);
+
+                    mensaje = "El cocinero terminó el pedido. Retira en local";
+                    grupoDestino = _context.Roles.Where(r => r.Nombre == "Cajero").FirstOrDefault().Id.ToString();
+                    EnviarNotificacionRol(grupoDestino, mensaje, pedidoDTO);
+                    break;
+
+                case (a: COCINANDO, b: PENDIENTE_ENTREGA):
+                    mensaje = "Su pedido esta está en camino!";
+                    grupoDestino = pedido.ClienteID.ToString();
+                    EnviarNotificacionCliente(grupoDestino, mensaje, pedidoDTO);
+
+                    mensaje = "El cocinero terminó el pedido. Enviar por delivery";
+                    grupoDestino = _context.Roles.Where(r => r.Nombre == "Cajero").FirstOrDefault().Id.ToString();
+                    EnviarNotificacionRol(grupoDestino, mensaje, pedidoDTO);
+                    break;
+                
+                case (a: LISTO_ENTREGA_LOCAL, b: ENTREGADO):
+                    mensaje = "Esperamos que disfrute su pedido!";
+                    grupoDestino = pedido.ClienteID.ToString();
+                    EnviarNotificacionCliente(grupoDestino, mensaje, pedidoDTO);
+                    break;
+
+                case (a: PENDIENTE_ENTREGA, b: ENTREGADO):
+                    mensaje = "Su pedido fue entregado!";
+                    grupoDestino = pedido.ClienteID.ToString();
+                    EnviarNotificacionCliente(grupoDestino, mensaje, pedidoDTO);
+                    break;
+
+                default:
+                    break;
+            }
+
             return NoContent();
+        }
+
+        private void EnviarNotificacionCliente(String grupoDestino, String mensaje, PedidoDTO pedido) { 
+            EnviarNotificacion("C" + grupoDestino, mensaje, pedido);
+        }
+
+        private void EnviarNotificacionRol(String grupoDestino, String mensaje, PedidoDTO pedido)
+        {
+            EnviarNotificacion("R" + grupoDestino, mensaje, pedido);
+        }
+
+        private void EnviarNotificacion(String grupoDestino,String mensaje, PedidoDTO pedido)
+        {
+            _hubContext
+            .Clients.Group(grupoDestino)
+            .SendAsync("Notificacion", mensaje, pedido);
         }
 
         // POST: api/Pedidos
@@ -77,10 +254,207 @@ namespace ElBuenSabor.Controllers
         [HttpPost]
         public async Task<ActionResult<Pedido>> PostPedido(Pedido pedido)
         {
+                 
             _context.Pedidos.Add(pedido);
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetPedido", new { id = pedido.Id }, pedido);
+        }
+
+
+        // POST: api/Pedidos/Finalizar/5
+        [HttpPost("Finalizar/{id}")]
+        public async Task<ActionResult<PedidoDTO>> FinalizarPedido(long id)
+        {
+
+            var pedido = await _context.Pedidos
+                .Include(p => p.DetallesPedido)
+                .ThenInclude(d => d.Articulo)
+                 .Include(p => p.Domicilio)
+                        .AsNoTracking()
+                .FirstOrDefaultAsync(c => c.Id == id);
+
+            /*
+             Finalizada la carga del pedido el sistema le informara al cliente 
+             cuanto es el tiempo estimado para el retiro o entrega de su pedido, 
+             este tiempo surgirá de la siguiente formula:
+                Σ Sumatoria del tiempo estimado de los artículos manufacturados 
+                  solicitados por el cliente en el pedido actual
+                +
+                Σ Sumatoria del tiempo estimado de los artículos manufacturados 
+                  que se encuentran en la cocina / cantidad cocineros
+                +
+                10 Minutos de entrega por Delivery, solo si corresponde.
+             */
+            SQLToJSON TiempoEstimadoCocinaPedidoActual = new SQLToJSON();
+            SQLToJSON TiempoEstimadoCocinaPedidosConEstado = new SQLToJSON();
+
+            var parametroIdPedidoActual = new Dictionary<String, object>();
+            parametroIdPedidoActual["@IdPedido"] = pedido.Id;
+            TiempoEstimadoCocinaPedidoActual.Agregar("EXECUTE TiempoEstimadoCocinaPedidoActual @IdPedido", parametroIdPedidoActual);
+            TiempoEstimadoCocinaPedidoActual.JSON();
+
+            var parametroEstadoActual = new Dictionary<String, object>();
+            parametroEstadoActual["@estado"] = 0;
+            TiempoEstimadoCocinaPedidosConEstado.Agregar("EXECUTE TiempoEstimadoCocinaPedidosConEstado @estado", parametroEstadoActual);
+            TiempoEstimadoCocinaPedidosConEstado.JSON();
+
+            
+            //agrega la fecha de hoy al pedido
+            pedido.Fecha = DateTime.Now;
+
+            //Agrega fecha estimada de finalizacion
+            dynamic TECocinaPedidoActual = JsonConvert.DeserializeObject(TiempoEstimadoCocinaPedidoActual.JSON());
+            dynamic TECocinaPedidosConEstado = JsonConvert.DeserializeObject(TiempoEstimadoCocinaPedidosConEstado.JSON());
+
+            int tiempoEntregaDelivery=0;
+
+
+            //Si el pedido es a domicili0, sumar los 10min extras 
+            if (pedido.TipoEnvio == 1)
+            {
+                tiempoEntregaDelivery = 10;
+            }
+
+            long FormulaTE;
+            if (_signalRGroups.Cocineros == 0)
+            {
+                FormulaTE = 9999999;
+            }
+            else 
+            {
+                //Comment this to Magni, maybe it's ok just use CantidadDeCocineros from database
+                FormulaTE= TECocinaPedidoActual.min + TECocinaPedidosConEstado.min / _signalRGroups.Cocineros + tiempoEntregaDelivery ;
+            }
+
+            //Calcular total del pedido 
+            PedidoTotalModificar(ref pedido);
+
+            pedido.HoraEstimadaFin = pedido.Fecha.AddMinutes(FormulaTE);
+            await PutPedido(id, pedido);
+
+            //-------notificacion
+            String mensaje = "";
+            String grupoDestino = "";
+            PedidoDTO pedidoDTO = new();
+            pedidoDTO.Cliente = pedido.Cliente;
+            pedidoDTO.Domicilio = pedido.Domicilio;
+            pedidoDTO.Estado = pedido.Estado;
+            pedidoDTO.Fecha = pedido.Fecha;
+            pedidoDTO.HoraEstimadaFin = pedido.HoraEstimadaFin;
+            pedidoDTO.Id = pedido.Id;
+            pedidoDTO.TipoEnvio = pedido.TipoEnvio;
+            pedidoDTO.Total = pedido.Total;
+
+            //Si NO paga por mercadolibre, su estado es PENDIENTE
+            if (pedidoDTO.Estado != PAGO_PENDIENTE_MP)
+            {
+                mensaje = "Ha ingresado un nuevo pedido";
+                grupoDestino = _context.Roles.Where(r => r.Nombre == "Cajero").FirstOrDefault().Id.ToString();
+                EnviarNotificacionRol(grupoDestino, mensaje, pedidoDTO);
+
+                mensaje = "Su pedido esta pendiente de aprobacion";
+                grupoDestino = pedido.ClienteID.ToString();
+                EnviarNotificacionCliente(grupoDestino, mensaje, pedidoDTO);
+
+
+            }
+            
+
+            //-------fin notificacion
+
+            return (pedidoDTO);
+        }
+
+        private void Facturar(Pedido pedido)
+        {
+            FacturasController facturasController = new FacturasController (_context);
+
+            bool existeFacturaDelPedido = facturasController.GetFacturaDePedidoExiste(pedido.Id).Result.Value;
+
+            //if (!existeFacturaDelPedido)
+            //{
+                Factura factura = new();
+                factura.Fecha = DateTime.Now;
+                factura.MontoDescuento = Convert.ToSingle(PedidoMontoDescuentoCalcular(pedido));
+                factura.PedidoId = pedido.Id;
+                factura.Total = Convert.ToDecimal(PedidoTotalCalcular(pedido));
+                var rs =  facturasController.PostFactura(factura).Result;
+                Factura fn = (rs.Result as ObjectResult).Value as Factura;
+                
+                foreach (var DP in fn.Pedido.DetallesPedido)
+                {
+                    for (int i = 1; i <= DP.Cantidad; i++)
+                    {
+                        if (DP.Articulo.EsManufacturado)
+                        {
+                            //foreach (var DR in DP.Articulo.Recetas.FirstOrDefault().DetallesRecetas)
+                            //{
+                            //    Egresar(DR.Articulo, DR.Cantidad, DP.Id);
+                            //}
+                        }
+                    }
+                }
+            //}
+        }
+
+        private void Egresar(Articulo articulo, double cantidad, long DFid)
+        {
+            Console.WriteLine("Articulo", articulo.Denominacion, "Cantidad", cantidad, "DFid", DFid);
+        }
+
+        // POST: api/Pedidos/MercadoPagoPreference
+        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        [HttpPost("MercadoPagoPreference")]
+        public async Task<ActionResult<Preference>> MercadoPago([FromBody] dynamic preferencia)
+        {
+
+            MercadoPagoConfig.AccessToken = "TEST-5059945658019779-070913-a1924cb562898b6ed9191db0f41badf6-155784029";
+
+            var request = new PreferenceRequest
+            {
+                Items = new List<PreferenceItemRequest>
+                {
+                    new PreferenceItemRequest
+                    {
+                        Title = "Carrito",
+                        Quantity = 1,
+                        CurrencyId = "ARS",
+                        UnitPrice = preferencia.total,
+                    },
+                },
+                BackUrls = new PreferenceBackUrlsRequest
+                {
+                    Success = "http://localhost:8080/cliente/Carrito/aprobado",
+                    Failure = "http://localhost:8080/cliente/Carrito/aprobado",
+                    Pending = "http://localhost:8080/cliente/Carrito/aprobado"
+                },
+                ExternalReference = Convert.ToString(preferencia.pedidoId),
+                //no se puede configurar que haga notificaciones a localHost, debe ser una url publica
+                // NotificationUrl = "https://localhost:44350/api/Pedidos/MercadoPagoNotificacion",
+            };
+
+            // Crea la preferencia usando el client
+            var client = new PreferenceClient();
+            Preference preference = await client.CreateAsync(request);
+            
+            return preference;
+        }
+
+
+        // POST: api/Pedidos/MercadoPagoNotificacion?topic=payment&id=123456789
+        [HttpPost("MercadoPagoNotificacion")]
+        public async Task<ActionResult<String>> MercadoPagoNotificacion([FromQuery] string topic, [FromQuery] long id)
+        {
+            using var httpClient = new HttpClient();
+
+            httpClient.DefaultRequestHeaders.Authorization =
+             new AuthenticationHeaderValue("Bearer", "TEST-5059945658019779-070913-a1924cb562898b6ed9191db0f41badf6-155784029");
+
+            var result = await httpClient.GetAsync("https://api.mercadopago.com/v1/payments/"+id);
+            Console.WriteLine(result.StatusCode);
+
+            return StatusCode(200);
         }
 
         // DELETE: api/Pedidos/5
@@ -102,6 +476,58 @@ namespace ElBuenSabor.Controllers
         private bool PedidoExists(long id)
         {
             return _context.Pedidos.Any(e => e.Id == id);
+        } 
+
+        private double PedidoMontoDescuentoCalcular(Pedido pedido)
+        {
+            double SumaDeDetallesPedido = 0;
+
+            //Calcular total del pedido 
+            foreach (var detalle in pedido.DetallesPedido)
+            {
+                SumaDeDetallesPedido += Convert.ToDouble(detalle.Subtotal);
+            }
+
+            if (pedido.TipoEnvio == LOCAL)
+            {
+                return SumaDeDetallesPedido * 0.1;
+            }
+
+            return 0;
         }
+
+        private double PedidoTotalCalcular(Pedido pedido)
+        {
+            double Total=0;
+            double SumaDeDetallesPedido = 0;
+
+            //no deberia ocurrir
+            if (pedido.DetallesPedido==null)
+            {
+                return 0;
+            }
+
+            //Calcular total del pedido 
+            foreach (var detalle in pedido.DetallesPedido)
+            {
+                SumaDeDetallesPedido += Convert.ToDouble(detalle.Subtotal);
+            }
+
+            Total = SumaDeDetallesPedido;
+
+            if (pedido.TipoEnvio==LOCAL)
+            {
+                Total = SumaDeDetallesPedido * 0.9;
+            }
+
+            return Total;
+
+        }
+
+        private void PedidoTotalModificar(ref Pedido pedido)
+        {
+            pedido.Total=PedidoTotalCalcular(pedido);
+        }
+
     }
 }

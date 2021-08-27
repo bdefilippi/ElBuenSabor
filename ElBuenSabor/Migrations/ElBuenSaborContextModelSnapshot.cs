@@ -67,9 +67,6 @@ namespace ElBuenSabor.Migrations
                     b.Property<bool>("Disabled")
                         .HasColumnType("bit");
 
-                    b.Property<string>("Email")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("Nombre")
                         .HasColumnType("nvarchar(max)");
 
@@ -156,6 +153,9 @@ namespace ElBuenSabor.Migrations
                     b.Property<bool>("Disabled")
                         .HasColumnType("bit");
 
+                    b.Property<int>("Estado")
+                        .HasColumnType("int");
+
                     b.Property<long>("PedidoID")
                         .HasColumnType("bigint");
 
@@ -180,6 +180,9 @@ namespace ElBuenSabor.Migrations
 
                     b.Property<double>("Cantidad")
                         .HasColumnType("float");
+
+                    b.Property<bool>("Disabled")
+                        .HasColumnType("bit");
 
                     b.Property<long>("RecetaID")
                         .HasColumnType("bigint");

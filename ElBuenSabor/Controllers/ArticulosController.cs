@@ -7,22 +7,34 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ElBuenSabor.Models;
 
+//-------p/Imagen
+using Microsoft.AspNetCore.Hosting;
+using System.IO;
+//-------p/Imagen
 
+//-------Jwt
+using Microsoft.AspNetCore.Authorization;
+//-------Jwt
 
 namespace ElBuenSabor.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    //[Authorize(Roles = "Usuario,Administrador,Cajero,Cocinero")]
+
     public class ArticulosController : ControllerBase
     {
 
-
-
         private readonly ElBuenSaborContext _context;
+        private static IWebHostEnvironment _environment; //Permite acceder a la carpeta del servidor para guardar imagenes
 
-        public ArticulosController(ElBuenSaborContext context)
+        public ArticulosController(ElBuenSaborContext context, IWebHostEnvironment environment)
         {
             _context = context;
+
+            //-------p/Imagen
+            _environment = environment;
+            //-------p/Imagen
         }
 
         // GET: api/Articulos
@@ -108,24 +120,32 @@ namespace ElBuenSabor.Controllers
         //    return SQLQuery(queryString, parametros);
         //}
 
-        // GET: /api/Articulos/Front/1
-        [HttpGet("Front/{id}")]
-        public String GetArticuloParaFront(long id)
+        // GET: /api/Articulos/ParaFront
+        [HttpGet("ParaFront")]
+        public String GetArticulosParaFront()
         {
             SQLToJSON ArticuloParaFront = new SQLToJSON();
+            SQLToJSON RecetaParaFront = new SQLToJSON();
+
+            ArticuloParaFront.Agregar("EXECUTE TodosLosArticulosAlaVentaParaFront");
+            RecetaParaFront.Agregar("EXECUTE TodosLosIngredientesParaFront");
+            return SQLToJSON.VincularArrayDeJSON(ArticuloParaFront.JSON(), "id", RecetaParaFront.JSON(), "ArticuloID", "Ingredientes");
+
+        }
+
+        // GET: /api/Articulos/ParaFront/1
+        [HttpGet("ParaFront/{id}")]
+        static public String GetArticuloParaFront(long id)
+        {
+            SQLToJSON ArticuloParaFront = new SQLToJSON();
+            SQLToJSON RecetaParaFront = new SQLToJSON();
 
             var parametros = new Dictionary<String, object>();
             parametros["@pricePoint"] = id;
-
             ArticuloParaFront.Agregar("EXECUTE ArticuloParaFront @pricePoint", parametros);
-            ArticuloParaFront.Agregar("EXECUTE CostoTotalDeArticuloConRecetaPorArticuloId @pricePoint", parametros);
-            ArticuloParaFront.Agregar("EXECUTE PrecioArticuloParaFront @pricePoint", parametros);
-            ArticuloParaFront.Agregar("ingredientes", "EXECUTE IngredientesParaFront @pricePoint", parametros);
-            ArticuloParaFront.Agregar("insumos", "EXECUTE InsumosParaFront @pricePoint", parametros);
-                       
+            ArticuloParaFront.Agregar("ingredientes", "EXECUTE IngredientesParaFront @pricePoint", parametros, true);
             return ArticuloParaFront.JSON();
         }
-
 
 
 
@@ -163,5 +183,63 @@ namespace ElBuenSabor.Controllers
 
             return sumatoria;
         }
+
+        //---------------------imagen-------------------------
+
+        // POST: /api/Articulos/UploadImage/1
+        [HttpPost("UploadImage/{id}"), DisableRequestSizeLimit]
+        public async Task<string> UploadFile([FromForm] IFormFile image, long id)
+        {
+
+            string path = Path.Combine(_environment.ContentRootPath, "Images/" + image.FileName);
+            using (var stream = new FileStream(path, FileMode.Create))
+            {
+                await image.CopyToAsync(stream);
+            }
+
+            AsignarImagen(image.FileName, id).Wait();
+            return image.FileName;
+
+        }
+
+        private async Task<bool> AsignarImagen(string FileName, long id)
+        {
+            var articulo = GetArticulo(id).Result.Value;
+            articulo.Imagen = FileName;
+            await PutArticulo(id, articulo);
+            return true;
+        }
+
+        // GET: /api/Articulos/Image/default.png
+        [HttpGet("Image/{fileName}")]
+        public IActionResult GetImage(string fileName)
+        {
+
+            string path = Path.Combine(_environment.ContentRootPath, "Images/" + fileName);
+            string defaultPath = Path.Combine(_environment.ContentRootPath, "Images/" + "default.png");
+            Console.WriteLine(fileName);
+            try
+            {
+                var image = System.IO.File.OpenRead(path);
+                return File(image, "image/jpeg");
+            }
+            catch (Exception)
+            {
+            }
+
+            var imageDefault = System.IO.File.OpenRead(defaultPath);
+            return File(imageDefault, "image/jpeg");
+        }
+
+        // GET: /api/Articulos/Image/
+        [HttpGet("Image/")]
+        public IActionResult GetDefault()
+        {
+            return GetImage("");
+        }
+
+        //-------------------fin imagen-----------------------
+
+
     }
 }

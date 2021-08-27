@@ -6,6 +6,11 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ElBuenSabor.Models;
+using ElBuenSabor.Models.Request;
+using ElBuenSabor.Services;
+using ElBuenSabor.Models.Response;
+using Google.Apis.Auth;
+using ElBuenSabor.Tools;
 
 namespace ElBuenSabor.Controllers
 {
@@ -15,9 +20,18 @@ namespace ElBuenSabor.Controllers
     {
         private readonly ElBuenSaborContext _context;
 
-        public UsuariosController(ElBuenSaborContext context)
+        /*es buena practica anteponer un guion bajo para variables privadas
+         para asi saber cuando lee en codigo abajo que se trata de una variable privada.
+        La interfaz sirve para que se mantenga la forma de la funcion pero pueda cambiarse
+        en algun momento la logica de autenticacion. Solo cambiando la clase en Startup que
+        implementa la interface y la inyecta es suficiente para cambiar el tipo de autenticacion
+         */
+        private readonly IAuthService _authService;
+        
+        public UsuariosController(ElBuenSaborContext context, IAuthService authService)
         {
             _context = context;
+            _authService = authService;
         }
 
         // GET: api/Usuarios
@@ -103,6 +117,9 @@ namespace ElBuenSabor.Controllers
         {
             return _context.Usuarios.Any(e => e.Id == id);
         }
+
+
+
 
     }
 }

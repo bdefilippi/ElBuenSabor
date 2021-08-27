@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ElBuenSabor.Models;
+using Newtonsoft.Json;
 
 namespace ElBuenSabor.Controllers
 {
@@ -77,9 +78,14 @@ namespace ElBuenSabor.Controllers
         [HttpPost]
         public async Task<ActionResult<DetallePedido>> PostDetallePedido(DetallePedido detallePedido)
         {
+            //Llena el campo subtotal. No lo trae desde el front por seguridad
+            dynamic articuloParaFront = JsonConvert.DeserializeObject(ArticulosController.GetArticuloParaFront(detallePedido.ArticuloID));
+            detallePedido.Subtotal = articuloParaFront.PrecioVenta * detallePedido.Cantidad;
+
             _context.DetallesPedidos.Add(detallePedido);
             await _context.SaveChangesAsync();
 
+            
             return CreatedAtAction("GetDetallePedido", new { id = detallePedido.Id }, detallePedido);
         }
 
