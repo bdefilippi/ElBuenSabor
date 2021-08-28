@@ -79,7 +79,7 @@ namespace ElBuenSabor.Controllers
         public async Task<ActionResult<DetallePedido>> PostDetallePedido(DetallePedido detallePedido)
         {
             //Llena el campo subtotal. No lo trae desde el front por seguridad
-            dynamic articuloParaFront = JsonConvert.DeserializeObject(ArticulosController.GetArticuloParaFront(detallePedido.ArticuloID));
+            dynamic articuloParaFront = JsonConvert.DeserializeObject(ArticulosController.GetArticuloParaFrontStatic(detallePedido.ArticuloID));
             detallePedido.Subtotal = articuloParaFront.PrecioVenta * detallePedido.Cantidad;
 
             _context.DetallesPedidos.Add(detallePedido);

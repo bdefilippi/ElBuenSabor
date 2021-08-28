@@ -13,7 +13,7 @@ namespace ElBuenSabor.Models
         public DateTime Fecha { get; set; }
         public Double MontoDescuento { get; set; }
         public bool Disabled { get; set; }
-        public long PedidoId { get; set; }
+        public long PedidoID { get; set; }
         public Pedido Pedido { get; set; }
         [NotMapped]
         public double TotalCosto { get; set; }

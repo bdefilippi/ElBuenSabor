@@ -30,6 +30,11 @@ namespace ElBuenSabor.Controllers
                 .HasForeignKey(t => t.FacturaID)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            //DetalleFactura - DetallePedido (composicion)
+            modelBuilder.Entity<DetalleFactura>()
+                .HasOne(a => a.DetallePedido)
+                .WithOne();
+
             //Receta - Articulo (composicion)
             modelBuilder.Entity<Receta>()
                 .HasOne<Articulo>(r => r.Articulo)

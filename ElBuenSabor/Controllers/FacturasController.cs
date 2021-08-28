@@ -46,7 +46,7 @@ namespace ElBuenSabor.Controllers
         [HttpGet("Pedido/{id}")]
         public async Task<ActionResult<Factura>> GetFacturaDePedido(long id)
         {
-            var factura = await _context.Facturas.Where(f=>f.PedidoId==id).FirstOrDefaultAsync();
+            var factura = await _context.Facturas.Where(f=>f.PedidoID==id).FirstOrDefaultAsync();
 
             if (factura == null)
             {
@@ -60,7 +60,7 @@ namespace ElBuenSabor.Controllers
         [HttpGet("PedidoExiste/{id}")]
         public async Task<ActionResult<Boolean>> GetFacturaDePedidoExiste(long id)
         {
-            return await _context.Facturas.Where(f => f.PedidoId == id).AnyAsync();
+            return await _context.Facturas.Where(f => f.PedidoID == id).AnyAsync();
 
         }
 

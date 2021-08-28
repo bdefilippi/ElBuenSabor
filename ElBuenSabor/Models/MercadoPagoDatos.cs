@@ -15,7 +15,7 @@ namespace ElBuenSabor.Models
         public string MetodoPago { get; set; }
         public String NroTarjeta { get; set; }
         public String Estado { get; set; }
-        public long PedidoId { get; set; }
+        public long PedidoID { get; set; }
         public Pedido Pedido { get; set; }
         public bool Disabled { get; set; }
 
