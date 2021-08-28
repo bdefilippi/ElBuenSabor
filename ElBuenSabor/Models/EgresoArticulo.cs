@@ -11,7 +11,7 @@ namespace ElBuenSabor.Models
         public int CantidadEgresada { get; set; }
         public long StockID { get; set; }
         public Stock Stock { get; set; }
-        public long DetallePedidoId { get; set; }
+        public long DetallePedidoID { get; set; }
         public DetallePedido DetallePedido { get; set; }
         public bool Disabled { get; set; }
 

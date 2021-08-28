@@ -79,9 +79,11 @@ namespace ElBuenSabor.Controllers
         {
             _context.DetallesFacturas.Add(detalleFactura);
             await _context.SaveChangesAsync();
-
+            
             return CreatedAtAction("GetDetalleFactura", new { id = detalleFactura.Id }, detalleFactura);
         }
+
+
 
         // DELETE: api/DetallesFacturas/5
         [HttpDelete("{id}")]

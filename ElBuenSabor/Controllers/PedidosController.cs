@@ -25,6 +25,7 @@ namespace ElBuenSabor.Controllers
     public class PedidosController : ControllerBase
     {
         private readonly ElBuenSaborContext _context;
+        
         private readonly IHubContext<NotificacionesAClienteHub> _hubContext;
         private readonly SignalRGroups _signalRGroups;
 
@@ -168,7 +169,7 @@ namespace ElBuenSabor.Controllers
                     EnviarNotificacionRol(grupoDestino, mensaje, pedidoDTO);
                     
                     //si se aprueba el pedido, facturar el pedido
-                    Facturar(pedidoParaDTO);
+                   await Facturar(pedidoParaDTO.Id);
 
                     break;
 
@@ -366,42 +367,80 @@ namespace ElBuenSabor.Controllers
             return (pedidoDTO);
         }
 
-        private void Facturar(Pedido pedido)
+        private async Task Facturar(long id)
         {
-            FacturasController facturasController = new FacturasController (_context);
 
-            bool existeFacturaDelPedido = facturasController.GetFacturaDePedidoExiste(pedido.Id).Result.Value;
+            var pedidoNuevo = await _context.Pedidos
+            .Include(p => p.DetallesPedido)
+            .ThenInclude(d => d.Articulo)
+            .Include(p => p.Domicilio)
+            .AsNoTracking()
+            .FirstOrDefaultAsync(c => c.Id == id);
+
+            //bool existeFacturaDelPedido = facturasController.GetFacturaDePedidoExiste(pedido.Id).Result.Value;
 
             //if (!existeFacturaDelPedido)
             //{
-                Factura factura = new();
+            Factura factura = new();
                 factura.Fecha = DateTime.Now;
-                factura.MontoDescuento = Convert.ToSingle(PedidoMontoDescuentoCalcular(pedido));
-                factura.PedidoId = pedido.Id;
-                factura.Total = Convert.ToDecimal(PedidoTotalCalcular(pedido));
-                var rs =  facturasController.PostFactura(factura).Result;
-                Factura fn = (rs.Result as ObjectResult).Value as Factura;
-                
-                foreach (var DP in fn.Pedido.DetallesPedido)
+                factura.MontoDescuento = Convert.ToSingle(PedidoMontoDescuentoCalcular(pedidoNuevo));
+                factura.PedidoID = pedidoNuevo.Id;
+                factura.Total = Convert.ToDecimal(PedidoTotalCalcular(pedidoNuevo));
+                factura.DetallesFactura = new List<DetalleFactura>();
+
+                //Crear detalles de factura por cada detalle del pedido
+                foreach (var DP in pedidoNuevo.DetallesPedido)
                 {
-                    for (int i = 1; i <= DP.Cantidad; i++)
+                    DetalleFactura detalleFactura = new();
+                    detalleFactura.DetallePedidoID = DP.Id;
+                    detalleFactura.Factura = factura;
+                    factura.DetallesFactura.Add(detalleFactura);
+                }
+
+            _context.Facturas.Add(factura);
+            await _context.SaveChangesAsync();
+
+            foreach (var detalleFactura in factura.DetallesFactura)
+            {
+
+            var detalleFacturaNuevo = await _context.DetallesFacturas
+                .Include(c => c.DetallePedido)
+                .ThenInclude(a => a.Articulo)
+                .ThenInclude(a => a.Recetas)
+                .ThenInclude(a => a.DetallesRecetas)
+                .ThenInclude(a => a.Articulo)
+                .Where(c => c.Id == detalleFactura.Id)
+                .FirstOrDefaultAsync();
+
+            for (int i = 1; i <= detalleFacturaNuevo.DetallePedido.Cantidad; i++)
+            {
+                if (detalleFacturaNuevo.DetallePedido.Articulo.EsManufacturado)
+                {
+                    foreach (var DR in detalleFacturaNuevo.DetallePedido.Articulo.Recetas.FirstOrDefault().DetallesRecetas)
                     {
-                        if (DP.Articulo.EsManufacturado)
-                        {
-                            //foreach (var DR in DP.Articulo.Recetas.FirstOrDefault().DetallesRecetas)
-                            //{
-                            //    Egresar(DR.Articulo, DR.Cantidad, DP.Id);
-                            //}
-                        }
+                      await Egresar(DR.Articulo, DR.Cantidad, detalleFacturaNuevo.Id);
                     }
                 }
-            //}
+            }
+
+            }
+            //} //if (!existeFacturaDelPedido)
+
         }
 
-        private void Egresar(Articulo articulo, double cantidad, long DFid)
+        private async Task Egresar(Articulo articulo, double cantidad, long DFid)
         {
-            Console.WriteLine("Articulo", articulo.Denominacion, "Cantidad", cantidad, "DFid", DFid);
+            Console.WriteLine("-----------------------------------------------------");
+            Console.WriteLine("Articulo: " + articulo.Denominacion + " - Cantidad: " + cantidad + " - DFid: " + DFid);
+            int cantidadQueFaltaEgresar = (int) cantidad;
+            var stock = await _context.Stocks
+                .Where(a => a.ArticuloID == articulo.Id)
+                .Where(b => b.CantidadDisponible > 0)
+                .Where(c => c.Disabled == false)
+                .OrderBy(d => d.FechaCompra).ToListAsync();
+            Console.WriteLine(stock.ToString());
         }
+
 
         // POST: api/Pedidos/MercadoPagoPreference
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754

@@ -35,6 +35,9 @@ namespace ElBuenSabor.Migrations
                     b.Property<bool>("Disabled")
                         .HasColumnType("bit");
 
+                    b.Property<bool>("EsManufacturado")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Imagen")
                         .HasColumnType("nvarchar(max)");
 
@@ -114,9 +117,6 @@ namespace ElBuenSabor.Migrations
                         .HasColumnType("bigint")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<long?>("ArticuloId")
-                        .HasColumnType("bigint");
-
                     b.Property<long>("DetallePedidoID")
                         .HasColumnType("bigint");
 
@@ -127,8 +127,6 @@ namespace ElBuenSabor.Migrations
                         .HasColumnType("bigint");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("ArticuloId");
 
                     b.HasIndex("DetallePedidoID");
 
@@ -158,6 +156,9 @@ namespace ElBuenSabor.Migrations
 
                     b.Property<long>("PedidoID")
                         .HasColumnType("bigint");
+
+                    b.Property<decimal>("Subtotal")
+                        .HasColumnType("decimal(18,2)");
 
                     b.HasKey("Id");
 
@@ -235,7 +236,7 @@ namespace ElBuenSabor.Migrations
                     b.Property<int>("CantidadEgresada")
                         .HasColumnType("int");
 
-                    b.Property<long>("DetalleFacturaId")
+                    b.Property<long>("DetallePedidoId")
                         .HasColumnType("bigint");
 
                     b.Property<bool>("Disabled")
@@ -246,7 +247,7 @@ namespace ElBuenSabor.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("DetalleFacturaId");
+                    b.HasIndex("DetallePedidoId");
 
                     b.HasIndex("StockID");
 
@@ -266,9 +267,6 @@ namespace ElBuenSabor.Migrations
                     b.Property<DateTime>("Fecha")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("FormaPago")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<double>("MontoDescuento")
                         .HasColumnType("float");
 
@@ -277,6 +275,9 @@ namespace ElBuenSabor.Migrations
 
                     b.Property<long>("PedidoId")
                         .HasColumnType("bigint");
+
+                    b.Property<decimal>("Total")
+                        .HasColumnType("decimal(18,2)");
 
                     b.HasKey("Id");
 
@@ -347,6 +348,9 @@ namespace ElBuenSabor.Migrations
 
                     b.Property<DateTime>("Fecha")
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("FormaPago")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("HoraEstimadaFin")
                         .HasColumnType("datetime2");
@@ -530,10 +534,6 @@ namespace ElBuenSabor.Migrations
 
             modelBuilder.Entity("ElBuenSabor.Models.DetalleFactura", b =>
                 {
-                    b.HasOne("ElBuenSabor.Models.Articulo", null)
-                        .WithMany("DetallesFacturas")
-                        .HasForeignKey("ArticuloId");
-
                     b.HasOne("ElBuenSabor.Models.DetallePedido", "DetallePedido")
                         .WithMany()
                         .HasForeignKey("DetallePedidoID")
@@ -602,9 +602,9 @@ namespace ElBuenSabor.Migrations
 
             modelBuilder.Entity("ElBuenSabor.Models.EgresoArticulo", b =>
                 {
-                    b.HasOne("ElBuenSabor.Models.DetalleFactura", "DetalleFactura")
+                    b.HasOne("ElBuenSabor.Models.DetallePedido", "DetallePedido")
                         .WithMany()
-                        .HasForeignKey("DetalleFacturaId")
+                        .HasForeignKey("DetallePedidoId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -614,7 +614,7 @@ namespace ElBuenSabor.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("DetalleFactura");
+                    b.Navigation("DetallePedido");
 
                     b.Navigation("Stock");
                 });
@@ -706,8 +706,6 @@ namespace ElBuenSabor.Migrations
 
             modelBuilder.Entity("ElBuenSabor.Models.Articulo", b =>
                 {
-                    b.Navigation("DetallesFacturas");
-
                     b.Navigation("DetallesPedidos");
 
                     b.Navigation("DetallesRecetas");

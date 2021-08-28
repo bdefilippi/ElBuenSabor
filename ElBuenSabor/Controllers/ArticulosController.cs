@@ -135,7 +135,7 @@ namespace ElBuenSabor.Controllers
 
         // GET: /api/Articulos/ParaFront/1
         [HttpGet("ParaFront/{id}")]
-        static public String GetArticuloParaFront(long id)
+        static public String GetArticuloParaFrontStatic(long id)
         {
             SQLToJSON ArticuloParaFront = new SQLToJSON();
             SQLToJSON RecetaParaFront = new SQLToJSON();
@@ -147,8 +147,12 @@ namespace ElBuenSabor.Controllers
             return ArticuloParaFront.JSON();
         }
 
-
-
+        // GET: /api/Articulos/ParaFront/1
+        [HttpGet("ParaFront/{id}")]
+        public String GetArticuloParaFront(long id)
+        {
+            return GetArticuloParaFrontStatic(id);
+        }
 
         // DELETE: api/Articulos/5
         [HttpDelete("{id}")]
