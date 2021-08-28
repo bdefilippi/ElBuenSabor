@@ -41,7 +41,22 @@ namespace ElBuenSabor.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Articulo>>> GetArticulos()
         {
-            return await _context.Articulos.ToListAsync();
+            return await _context.Articulos
+                .Select(x => new Articulo()
+                {
+                    Id = x.Id,
+                    Denominacion = x.Denominacion,
+                    Imagen = x.Imagen,
+                    ImageSrc = String.Format("{0}://{1}{2}/wwwroot/images/{3}", Request.Scheme, Request.Host, Request.PathBase, x.Imagen),
+                    UnidadMedida = x.UnidadMedida,
+                    StockMinimo = x.StockMinimo,
+                    EsManufacturado = x.EsManufacturado,
+                    ALaVenta = x.ALaVenta,
+                    Disabled = x.Disabled,
+                    RubroArticuloID = x.RubroArticuloID
+                }
+                ).Where(a => a.Disabled.Equals(false))
+                .ToListAsync();
         }
 
         // GET: api/Articulos/5
@@ -79,6 +94,12 @@ namespace ElBuenSabor.Controllers
                 return BadRequest();
             }
 
+            if (articulo.ImageFile != null)
+            {
+                DeleteImage(articulo.Imagen);
+                articulo.Imagen = await SaveImage(articulo.ImageFile);
+            }
+
             _context.Entry(articulo).State = EntityState.Modified;
 
             try
@@ -105,6 +126,7 @@ namespace ElBuenSabor.Controllers
         [HttpPost]
         public async Task<ActionResult<Articulo>> PostArticulo(Articulo articulo)
         {
+            articulo.Imagen = await SaveImage(articulo.ImageFile);
             _context.Articulos.Add(articulo);
             await _context.SaveChangesAsync();
 
@@ -159,6 +181,7 @@ namespace ElBuenSabor.Controllers
             {
                 return NotFound();
             }
+            DeleteImage(articulo.Imagen);
 
             _context.Articulos.Remove(articulo);
             await _context.SaveChangesAsync();
@@ -187,36 +210,36 @@ namespace ElBuenSabor.Controllers
         //---------------------imagen-------------------------
 
         // POST: /api/Articulos/UploadImage/1
-        [HttpPost("UploadImage/{id}"), DisableRequestSizeLimit]
-        public async Task<string> UploadFile([FromForm] IFormFile image, long id)
-        {
+        //[HttpPost("UploadImage/{id}"), DisableRequestSizeLimit]
+        //public async Task<string> UploadFile([FromForm] IFormFile image, long id)
+        //{
 
-            string path = Path.Combine(_environment.ContentRootPath, "Images/" + image.FileName);
-            using (var stream = new FileStream(path, FileMode.Create))
-            {
-                await image.CopyToAsync(stream);
-            }
+        //    string path = Path.Combine(_environment.ContentRootPath, "Images/" + image.FileName);
+        //    using (var stream = new FileStream(path, FileMode.Create))
+        //    {
+        //        await image.CopyToAsync(stream);
+        //    }
 
-            AsignarImagen(image.FileName, id).Wait();
-            return image.FileName;
+        //    AsignarImagen(image.FileName, id).Wait();
+        //    return image.FileName;
 
-        }
+        //}
 
-        private async Task<bool> AsignarImagen(string FileName, long id)
-        {
-            var articulo = GetArticulo(id).Result.Value;
-            articulo.Imagen = FileName;
-            await PutArticulo(id, articulo);
-            return true;
-        }
+        //private async Task<bool> AsignarImagen(string FileName, long id)
+        //{
+        //    var articulo = GetArticulo(id).Result.Value;
+        //    articulo.Imagen = FileName;
+        //    await PutArticulo(id, articulo);
+        //    return true;
+        //}
 
         // GET: /api/Articulos/Image/default.png
         [HttpGet("Image/{fileName}")]
         public IActionResult GetImage(string fileName)
         {
 
-            string path = Path.Combine(_environment.ContentRootPath, "Images/" + fileName);
-            string defaultPath = Path.Combine(_environment.ContentRootPath, "Images/" + "default.png");
+            string path = Path.Combine(_environment.ContentRootPath, "wwwroot/images/" + fileName);
+            string defaultPath = Path.Combine(_environment.ContentRootPath, "wwwroot/images/" + "default.png");
             Console.WriteLine(fileName);
             try
             {
@@ -238,8 +261,30 @@ namespace ElBuenSabor.Controllers
             return GetImage("");
         }
 
+        [NonAction]
+        public async Task<string> SaveImage(IFormFile imageFile)
+        {
+            string imageName = new string(Path.GetFileNameWithoutExtension(imageFile.FileName).Take(10).ToArray()).Replace(" ", "-");
+            imageName = imageName + DateTime.Now.ToString("yymmssfff") + Path.GetExtension(imageFile.FileName);
+            var imagePath = Path.Combine(_environment.ContentRootPath, "wwwroot/images/", imageName);
+            using (var fileStream = new FileStream(imagePath, FileMode.Create))
+            {
+                await imageFile.CopyToAsync(fileStream);
+            }
+
+            return imageName;
+        }
+
+        [NonAction]
+        public void DeleteImage(string imageName)
+        {
+            var imagePath = Path.Combine(_environment.ContentRootPath, "wwwroot/images/", imageName);
+            if (System.IO.File.Exists(imagePath))
+            {
+                System.IO.File.Delete(imagePath);
+            }
+        }
+
         //-------------------fin imagen-----------------------
-
-
     }
 }

@@ -11,7 +11,7 @@ namespace ElBuenSabor.Models
     {
         public long Id { get; set; }
         public String Denominacion { get; set; }
-        public String Imagen { get; set; }
+        public String Imagen { get; set; }  //aka imagename
         [NotMapped]
         public IFormFile ImageFile { get; set; }
         [NotMapped]
