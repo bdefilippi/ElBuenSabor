@@ -418,7 +418,10 @@ namespace ElBuenSabor.Controllers
                 {
                     foreach (var DR in detalleFacturaNuevo.DetallePedido.Articulo.Recetas.FirstOrDefault().DetallesRecetas)
                     {
-                      await Egresar(DR.Articulo, DR.Cantidad, detalleFacturaNuevo.Id);
+                            if (DR.Disabled==false)
+                            {
+                            await Egresar(DR.Articulo, DR.Cantidad, detalleFacturaNuevo.Id);
+                            }
                     }
                 }
             }
@@ -430,15 +433,62 @@ namespace ElBuenSabor.Controllers
 
         private async Task Egresar(Articulo articulo, double cantidad, long DFid)
         {
+            Console.WriteLine("  ");
             Console.WriteLine("-----------------------------------------------------");
             Console.WriteLine("Articulo: " + articulo.Denominacion + " - Cantidad: " + cantidad + " - DFid: " + DFid);
+            Console.WriteLine("  ");
+            Console.WriteLine("Stock ante de egreso:");
             int cantidadQueFaltaEgresar = (int) cantidad;
             var stock = await _context.Stocks
                 .Where(a => a.ArticuloID == articulo.Id)
                 .Where(b => b.CantidadDisponible > 0)
                 .Where(c => c.Disabled == false)
                 .OrderBy(d => d.FechaCompra).ToListAsync();
-            Console.WriteLine(stock.ToString());
+
+            foreach (var item in stock)
+            {
+                Console.WriteLine("Fecha: " + item.FechaCompra +  " - Articulo: "+item.Articulo.Denominacion + " - Cantidad: " + item.CantidadDisponible);
+            }
+            
+            int i = 0;
+            while (cantidadQueFaltaEgresar>0)
+            {
+
+                EgresoArticulo egresoArticulo = new();
+                
+                if (cantidadQueFaltaEgresar >= stock[i].CantidadDisponible)
+                {
+                    cantidadQueFaltaEgresar -= stock[i].CantidadDisponible;
+                    egresoArticulo.CantidadEgresada = stock[i].CantidadDisponible;
+                    stock[i].CantidadDisponible = 0;
+                }
+                else if (cantidadQueFaltaEgresar < stock[i].CantidadDisponible)
+                {
+                    stock[i].CantidadDisponible -= cantidadQueFaltaEgresar;
+                    egresoArticulo.CantidadEgresada = cantidadQueFaltaEgresar;
+                    cantidadQueFaltaEgresar = 0;
+                }
+                //Guardar el Egreso
+                egresoArticulo.StockID = stock[i].Id;
+                egresoArticulo.DetalleFacturaID = DFid;
+                _context.EgresosArticulos.Add(egresoArticulo);
+                await _context.SaveChangesAsync();
+
+                //Guardar modificaciones la tabla de Stock
+                _context.Entry(stock[i]).State = EntityState.Modified;
+                await _context.SaveChangesAsync();
+
+                i++;
+            }
+
+            Console.WriteLine("  ");
+            Console.WriteLine("Stock luego de egreso:");
+            foreach (var item in stock)
+            {
+                Console.WriteLine("Fecha: " + item.FechaCompra + " - Articulo: " + item.Articulo.Denominacion + " - Cantidad: " + item.CantidadDisponible);
+            }
+
+
         }
 
 
