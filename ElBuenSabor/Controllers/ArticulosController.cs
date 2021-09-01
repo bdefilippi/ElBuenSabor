@@ -142,6 +142,18 @@ namespace ElBuenSabor.Controllers
         //    return SQLQuery(queryString, parametros);
         //}
 
+        // GET: /api/Articulos/StockTotalParaArticulosManufacturados/2
+        [HttpGet("StockTotalParaArticulosManufacturados/{id}")]
+        public String StockTotalParaArticulosManufacturados(long id)
+        {
+            SQLToJSON stockTotalParaArticulosManufacturados = new SQLToJSON();
+
+            var parametros = new Dictionary<String, object>();
+            parametros["@IdArticulo"] = id;
+            stockTotalParaArticulosManufacturados.Agregar("EXECUTE StockTotalParaArticulosManufacturados @IdArticulo", parametros);
+            return stockTotalParaArticulosManufacturados.JSON();
+        }
+
         // GET: /api/Articulos/ParaFront
         [HttpGet("ParaFront")]
         public String GetArticulosParaFront()
