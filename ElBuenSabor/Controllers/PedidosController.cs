@@ -73,6 +73,7 @@ namespace ElBuenSabor.Controllers
         {
 
             var pedido = await _context.Pedidos
+                .Include(p => p.Cliente)
                 .Include(p => p.DetallesPedido)
                 .ThenInclude(d=>d.Articulo)
                 .FirstOrDefaultAsync(c => c.Id == id);
