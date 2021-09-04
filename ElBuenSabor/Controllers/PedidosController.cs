@@ -17,6 +17,10 @@ using System.Web;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net;
+using System.Net.Mail;
+using SelectPdf;
+using ElBuenSabor.Tools;
+using System.IO;
 
 namespace ElBuenSabor.Controllers
 {
@@ -420,14 +424,157 @@ namespace ElBuenSabor.Controllers
                     {
                             if (DR.Disabled==false)
                             {
-                            await Egresar(DR.Articulo, DR.Cantidad, detalleFacturaNuevo.Id);
+                            //await Egresar(DR.Articulo, DR.Cantidad, detalleFacturaNuevo.Id);
+                            //Toma una ETERNIDAD para pedidos grandes
                             }
                     }
                 }
             }
 
             }
+
+            Factura facturaNueva = await _context.Facturas
+                .Include(a => a.Pedido)
+                .ThenInclude(a => a.Cliente)
+                .ThenInclude(a => a.Usuario)
+                .FirstAsync(a => a.Id == factura.Id);
+
+            string facturaHtml = await FacturaToHTML(factura.Id);
+            string facturaPDF = HTML2PDF(facturaHtml);
+            SendMail(facturaNueva.Pedido.Cliente.Usuario.NombreUsuario, facturaPDF);
+
             //} //if (!existeFacturaDelPedido)
+
+        }
+
+        private void SendMail(String correo, String attachmentFilePath )
+        {
+            try
+            {
+                MailMessage mail = new MailMessage();
+                SmtpClient SmtpServer = new SmtpClient("smtp.gmail.com");
+                mail.From = new MailAddress("ElBuenSaborUTN2021@gmail.com");
+                mail.To.Add(correo);
+                mail.Subject = "LaBuenaFactura ";
+                mail.Body = "Factura";
+
+                System.Net.Mail.Attachment attachment;
+                attachment = new System.Net.Mail.Attachment(attachmentFilePath);
+                mail.Attachments.Add(attachment);
+
+                SmtpServer.Port = 587;
+                SmtpServer.Credentials = new System.Net.NetworkCredential("ElBuenSaborUTN2021", "lddqvjtayidwimls");
+                SmtpServer.EnableSsl = true;
+                SmtpServer.DeliveryMethod = SmtpDeliveryMethod.Network;
+                SmtpServer.Send(mail);
+                Console.WriteLine("Correo Enviado");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+            }
+        }
+
+
+        private async Task<String> FacturaToHTML(long id)
+        {
+
+            Factura factura = await _context.Facturas
+                .Include(a => a.Pedido)
+                    .ThenInclude(a => a.DetallesPedido)
+                    .ThenInclude(a => a.Articulo)
+                .Include(a => a.Pedido.Domicilio)
+                .Include(a => a.Pedido.Cliente)
+                .AsNoTracking()
+                .FirstOrDefaultAsync(a => a.Id == id);
+
+            String DetallesFactura = "";
+           
+            foreach (var item in factura.Pedido.DetallesPedido)
+            {
+                var templateDetalle = new HtmlTemplate(@"DetalleFactura.html");
+                var outputDetalle = templateDetalle.Render(new
+                {
+                    CODIGO = Convert.ToString(item.ArticuloID),
+                    PRODUCTO = item.Articulo.Denominacion,
+                    CANTIDAD = Convert.ToString(item.Cantidad),
+                    UNIDADDEMEDIDA = item.Articulo.UnidadMedida,
+                    PRECIOUNITARIO = Convert.ToString( Math.Floor( (item.Subtotal*10)/ item.Cantidad)/10),
+                    SUBTOTAL = Convert.ToString(item.Subtotal),
+                });
+
+                    DetallesFactura += outputDetalle;
+            }
+
+            var template = new HtmlTemplate(@"FacturaTemplate.html");
+            var output = template.Render(new
+            {
+                NUMERODEFACTURA =Convert.ToString( factura.Numero),
+                FECHADEEMISION = Convert.ToString(factura.Fecha),
+                APELLIDOYNOMBRE = factura.Pedido.Cliente.Apellido + ", " + factura.Pedido.Cliente.Nombre,
+                CONDICIONDEVENTA = factura.Pedido.FormaPago ,
+                DOMICILIO = factura.Pedido.Domicilio.Calle + " " + factura.Pedido.Domicilio.Numero + ", " + factura.Pedido.Domicilio.Localidad,
+                IMPORTETOTAL = Convert.ToString(factura.Total),
+                DETALLESDEFACTURA = DetallesFactura
+            }); ;
+
+            String newHtmlPath = @"F-" + Convert.ToString(factura.Numero) + " - " + factura.Pedido.Cliente.Apellido + " " + factura.Pedido.Cliente.Nombre + ".html";
+
+            using (StreamWriter writetext = new StreamWriter(newHtmlPath))
+            {
+                writetext.WriteLine(output);
+            }
+
+            return newHtmlPath;
+        }
+
+        private String HTML2PDF(String facturaHtmlFileName)
+        {
+
+            // This will get the current WORKING directory (i.e. \bin\Debug)
+            string workingDirectory = Environment.CurrentDirectory;
+            // or: Directory.GetCurrentDirectory() gives the same result
+            // This will get the current PROJECT bin directory (ie ../bin/)
+            //string projectDirectory = Directory.GetParent(workingDirectory).Parent.FullName;
+            // This will get the current PROJECT directory
+            //string projectDirectory2 = Directory.GetParent(workingDirectory).Parent.Parent.FullName;
+
+            // read parameters from the webpage
+            string url = workingDirectory + "\\" + facturaHtmlFileName;
+            string pdfFile = workingDirectory + "\\wwwroot\\PDF\\" + facturaHtmlFileName.Split(".")[0] + ".pdf";
+
+            // instantiate the html to pdf converter
+            HtmlToPdf converter = new HtmlToPdf();
+
+            //A standard A4 page has 595 x 842 points. 1 point is 1/72 inch. 1 pixel is 1/96 inch. This means that an A4 page width is 793px. 
+            converter.Options.WebPageWidth = 793;
+            converter.Options.AutoFitWidth = HtmlToPdfPageFitMode.AutoFit;
+
+            // set converter rendering engine
+            converter.Options.RenderingEngine = RenderingEngine.Blink;
+
+            // set document passwords
+            converter.Options.SecurityOptions.OwnerPassword = "pass1";
+            //converter.Options.SecurityOptions.UserPassword = "pass2";
+
+            //set document permissions
+            converter.Options.SecurityOptions.CanAssembleDocument = false;
+            converter.Options.SecurityOptions.CanCopyContent = true;
+            converter.Options.SecurityOptions.CanEditAnnotations = true;
+            converter.Options.SecurityOptions.CanEditContent = false;
+            converter.Options.SecurityOptions.CanFillFormFields = false;
+            converter.Options.SecurityOptions.CanPrint = true;
+
+            // convert the url to pdf
+            PdfDocument doc = converter.ConvertUrl(url);
+           
+            // save pdf document
+            doc.Save(pdfFile);
+
+            // close pdf document
+            doc.Close();
+
+            return pdfFile;
 
         }
 

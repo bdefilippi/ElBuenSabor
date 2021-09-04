@@ -6,9 +6,17 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ElBuenSabor.Models;
+using System.Net.Http.Headers;
+using System.IO;
+using System.Net.Http;
+using System.Net;
 
 namespace ElBuenSabor.Controllers
 {
+
+
+
+
     [Route("api/[controller]")]
     [ApiController]
     public class FacturasController : ControllerBase
@@ -18,6 +26,16 @@ namespace ElBuenSabor.Controllers
         public FacturasController(ElBuenSaborContext context)
         {
             _context = context;
+        }
+
+        // GET: api/Facturas/PDF/5
+        [HttpGet("PDF/{id}")]
+        public async Task<ActionResult> DownloadFile(int id)
+        {
+            var filePath = "FacturaModelo.pdf"; // Here, you should validate the request and the existance of the file.
+
+            var bytes = await System.IO.File.ReadAllBytesAsync(filePath);
+            return File(bytes, "text/plain", Path.GetFileName(filePath));
         }
 
         // GET: api/Facturas
