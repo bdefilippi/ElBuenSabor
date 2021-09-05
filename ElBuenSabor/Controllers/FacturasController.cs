@@ -30,9 +30,20 @@ namespace ElBuenSabor.Controllers
 
         // GET: api/Facturas/PDF/5
         [HttpGet("PDF/{id}")]
-        public async Task<ActionResult> DownloadFile(int id)
+        public async Task<ActionResult> DownloadFile(long id)
         {
-            var filePath = "FacturaModelo.pdf"; // Here, you should validate the request and the existance of the file.
+            Factura factura = await _context.Facturas
+            .Include(a => a.Pedido)
+            .ThenInclude(a => a.DetallesPedido)
+            .ThenInclude(a => a.Articulo)
+            .Include(a => a.Pedido.Domicilio)
+            .Include(a => a.Pedido.Cliente)
+            .AsNoTracking()
+            .FirstOrDefaultAsync(a => a.Id == id);
+
+            string workingDirectory = Environment.CurrentDirectory + "\\wwwroot\\PDF\\";
+            String fileName = @"F-" + Convert.ToString(factura.Numero) + " - " + factura.Pedido.Cliente.Apellido + " " + factura.Pedido.Cliente.Nombre + ".pdf";
+            String filePath = workingDirectory + fileName;
 
             var bytes = await System.IO.File.ReadAllBytesAsync(filePath);
             return File(bytes, "text/plain", Path.GetFileName(filePath));

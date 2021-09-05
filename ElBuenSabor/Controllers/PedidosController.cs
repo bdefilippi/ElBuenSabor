@@ -405,8 +405,8 @@ namespace ElBuenSabor.Controllers
                 .ThenInclude(a => a.Recetas)
                 .ThenInclude(a => a.DetallesRecetas)
                 .ThenInclude(a => a.Articulo)
-                .Where(c => c.Id == detalleFactura.Id)
-                .FirstOrDefaultAsync();
+                .AsNoTracking()
+                .FirstOrDefaultAsync(c => c.Id == detalleFactura.Id);
 
             for (int i = 1; i <= detalleFacturaNuevo.DetallePedido.Cantidad; i++)
             {

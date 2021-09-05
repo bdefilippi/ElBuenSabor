@@ -39,7 +39,7 @@ namespace ElBuenSabor.Models.Response
     public class UsuarioDTO
     {
         public string NombreUsuario { get; set; }
-        public long RolId { get; set; }
+        public long RolID { get; set; }
         public string Rol { get; set; }
     }
 }
