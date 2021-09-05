@@ -396,6 +396,19 @@ namespace ElBuenSabor.Controllers
             _context.Facturas.Add(factura);
             await _context.SaveChangesAsync();
 
+
+            //Hacer Factura.Numero = Factura.Id
+            Factura facturaNueva = await _context.Facturas
+            .Include(a => a.Pedido)
+            .ThenInclude(a => a.Cliente)
+            .ThenInclude(a => a.Usuario)
+            .FirstOrDefaultAsync(a => a.Id == factura.Id);
+
+            facturaNueva.Numero = facturaNueva.Id;
+            
+            _context.Entry(factura).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
+
             foreach (var detalleFactura in factura.DetallesFactura)
             {
 
@@ -425,12 +438,12 @@ namespace ElBuenSabor.Controllers
 
             }
 
-            Factura facturaNueva = await _context.Facturas
-                .Include(a => a.Pedido)
-                .ThenInclude(a => a.Cliente)
-                .ThenInclude(a => a.Usuario)
-                .AsNoTracking()
-                .FirstOrDefaultAsync(a => a.Id == factura.Id);
+            facturaNueva = await _context.Facturas
+            .Include(a => a.Pedido)
+            .ThenInclude(a => a.Cliente)
+            .ThenInclude(a => a.Usuario)
+            .AsNoTracking()
+            .FirstOrDefaultAsync(a => a.Id == factura.Id);
 
             string facturaHtml = await FacturaToHTML(factura.Id);
             string facturaPDF = HTML2PDF(facturaHtml);
