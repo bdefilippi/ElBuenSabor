@@ -93,7 +93,7 @@ namespace ElBuenSabor.Controllers
                 Usuario usuarioNuevo = new();
                 usuarioNuevo.NombreUsuario = payload.Email;
                 usuarioNuevo.Clave = hashCommonPassword;
-                usuarioNuevo.RolId = 1; //Corresponde al Cliente en la base de datos de Roles
+                usuarioNuevo.RolID = 1; //Corresponde al Cliente en la base de datos de Roles
                 _context.Usuarios.Add(usuarioNuevo);
                 _context.SaveChanges(); //Debería hacerse de forma asincrona, cambiar eso
 
@@ -140,7 +140,7 @@ namespace ElBuenSabor.Controllers
                 usuarioNuevo.NombreUsuario = registroRequest.Email;
                 string hashCommonPassword = Encrypt.GetSHA256(registroRequest.Clave);
                 usuarioNuevo.Clave = hashCommonPassword;
-                usuarioNuevo.RolId = 1; //Corresponde al Cliente en la base de datos de Roles
+                usuarioNuevo.RolID = 1; //Corresponde al Cliente en la base de datos de Roles
                 _context.Usuarios.Add(usuarioNuevo);
                 _context.SaveChanges(); //Debería hacerse de forma asincrona, cambiar eso
 

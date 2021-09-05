@@ -11,7 +11,7 @@ namespace ElBuenSabor.Models
         public String NombreUsuario { get; set; }
         public String Clave { get; set; }
         public bool Disabled { get; set; }
-        public long RolId { get; set; }
+        public long RolID { get; set; }
         public Rol Rol { get; set; }
 
 

@@ -84,7 +84,10 @@ namespace ElBuenSabor.Controllers
                 .HasForeignKey(t => t.ArticuloID)
                 .OnDelete(DeleteBehavior.NoAction);
 
-
+            //Cliente - Usuario 
+            modelBuilder.Entity<Cliente>()
+                .HasOne(a => a.Usuario)
+                .WithOne();
 
 
         }

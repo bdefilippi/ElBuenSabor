@@ -8,12 +8,9 @@ namespace ElBuenSabor.Hubs
 {
     public class NotificacionesAClienteHub: Hub
     {
-        private readonly SignalRGroups _signalRGroups;
 
-        public NotificacionesAClienteHub(SignalRGroups signalRGroups)
+        public NotificacionesAClienteHub()
         {
-            _signalRGroups = signalRGroups;
-            //Clients.Users()
         }
 
 
@@ -21,23 +18,11 @@ namespace ElBuenSabor.Hubs
         public async Task JoinRolIDToGroup(long rolID)
         {
             await Groups.AddToGroupAsync(Context.ConnectionId, "R" + rolID.ToString());
-            if (rolID==4)
-            {
-            _signalRGroups.Cocineros++;
-            }
         }
 
         public async Task RemoveRolIDFromGroup(long rolID)
         {
             await Groups.RemoveFromGroupAsync(Context.ConnectionId, "R" + rolID.ToString());
-            if (rolID == 4)
-            {
-                _signalRGroups.Cocineros--;
-                if (_signalRGroups.Cocineros<0)
-                {
-                    _signalRGroups.Cocineros = 0;
-                }
-            }
         }
 
 

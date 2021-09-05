@@ -55,7 +55,7 @@ namespace ElBuenSabor.Services
 
                 authResponse.Usuario.NombreUsuario = usuario.NombreUsuario;
                 authResponse.Usuario.Rol = usuario.Rol.Nombre;
-                authResponse.Usuario.RolId = usuario.RolId;
+                authResponse.Usuario.RolId = usuario.RolID;
 
                 authResponse.Token = CreateUserAuthToken(usuario);
 

@@ -31,7 +31,6 @@ namespace ElBuenSabor.Controllers
         private readonly ElBuenSaborContext _context;
         
         private readonly IHubContext<NotificacionesAClienteHub> _hubContext;
-        private readonly SignalRGroups _signalRGroups;
 
         const int PAGO_PENDIENTE_MP = -1;
         const int PENDIENTE = 0;
@@ -47,11 +46,10 @@ namespace ElBuenSabor.Controllers
         const int DOMICILIO = 1;
     
 
-        public PedidosController(ElBuenSaborContext context, IHubContext<NotificacionesAClienteHub> notificacionesAClienteHub, SignalRGroups signalRGroups)
+        public PedidosController(ElBuenSaborContext context, IHubContext<NotificacionesAClienteHub> notificacionesAClienteHub)
         {
             _context = context;
             _hubContext = notificacionesAClienteHub;
-            _signalRGroups = signalRGroups;
         }
 
         // GET: api/Pedidos
@@ -256,8 +254,6 @@ namespace ElBuenSabor.Controllers
         }
 
         // POST: api/Pedidos
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost]
         public async Task<ActionResult<Pedido>> PostPedido(Pedido pedido)
         {
                  
@@ -322,16 +318,11 @@ namespace ElBuenSabor.Controllers
                 tiempoEntregaDelivery = 10;
             }
 
-            long FormulaTE;
-            if (_signalRGroups.Cocineros == 0)
-            {
-                FormulaTE = 9999999;
-            }
-            else 
-            {
-                //Comment this to Magni, maybe it's ok just use CantidadDeCocineros from database
-                FormulaTE= TECocinaPedidoActual.min + TECocinaPedidosConEstado.min / _signalRGroups.Cocineros + tiempoEntregaDelivery ;
-            }
+            Configuracion configuracion = await _context.Configuraciones.FirstOrDefaultAsync();
+            int CocinerosCant = configuracion.CantidadCocineros;
+
+            long FormulaTE= TECocinaPedidoActual.min + TECocinaPedidosConEstado.min / CocinerosCant  + tiempoEntregaDelivery ;
+
 
             //Calcular total del pedido 
             PedidoTotalModificar(ref pedido);
@@ -438,7 +429,8 @@ namespace ElBuenSabor.Controllers
                 .Include(a => a.Pedido)
                 .ThenInclude(a => a.Cliente)
                 .ThenInclude(a => a.Usuario)
-                .FirstAsync(a => a.Id == factura.Id);
+                .AsNoTracking()
+                .FirstOrDefaultAsync(a => a.Id == factura.Id);
 
             string facturaHtml = await FacturaToHTML(factura.Id);
             string facturaPDF = HTML2PDF(facturaHtml);
