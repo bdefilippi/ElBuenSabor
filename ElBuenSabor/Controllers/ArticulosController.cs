@@ -174,8 +174,8 @@ namespace ElBuenSabor.Controllers
             SQLToJSON ArticuloParaFront = new SQLToJSON();
             SQLToJSON RecetaParaFront = new SQLToJSON();
 
-            ArticuloParaFront.Agregar("EXECUTE TodosLosArticulosAlaVentaParaFront");
-            RecetaParaFront.Agregar("EXECUTE TodosLosIngredientesParaFront");
+            ArticuloParaFront.Agregar("EXECUTE TodosLosArticulosAlaVentaParaFront", true);
+            RecetaParaFront.Agregar("EXECUTE TodosLosIngredientesParaFront", true);
             return SQLToJSON.VincularArrayDeJSON(ArticuloParaFront.JSON(), "id", RecetaParaFront.JSON(), "ArticuloID", "Ingredientes");
 
         }

@@ -29,16 +29,19 @@ namespace ElBuenSabor
             jSON += SQLQuery(SQLquery, parametros); //  Arma  [{},{},{}] o {}
         }
 
-        public void Agregar(String SQLquery)
+        public void Agregar(String SQLquery, bool forceArray=false)
         {
             jSON += SQLQuery(SQLquery); //  Arma  [{},{},{}] o {}
+            if (forceArray && !jSON.StartsWith('['));
+                jSON = "[" + jSON + "]";
         }
 
-        public string JSON(bool noDobleMustache=false)
+        public string JSON(bool noDoubleLlaves=false)
         {
-            if (noDobleMustache)
-                 return jSON.Replace("}{", ",").Replace("[[", "[").Replace("]]", "]").Replace("{{", "{").Replace("}}", "}");
-            return jSON.Replace("}{", ",").Replace("[[", "[").Replace("]]", "]"); // Une los objetos quitando las divisiones interrnas
+            string a = jSON.Replace("}{", ",");// Une los objetos quitando las divisiones interrnas
+            if (noDoubleLlaves) 
+                return a.Replace("[[", "[").Replace("]]", "]");
+            return a;
         }
 
         public static String SQLQuery(string queryString, Dictionary<string, object> parametros = null)

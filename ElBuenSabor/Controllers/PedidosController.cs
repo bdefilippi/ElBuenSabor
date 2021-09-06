@@ -312,8 +312,8 @@ namespace ElBuenSabor.Controllers
             pedido.Fecha = DateTime.Now;
 
             //Agrega fecha estimada de finalizacion
-            dynamic TECocinaPedidoActual = JsonConvert.DeserializeObject(TiempoEstimadoCocinaPedidoActual.JSON(true));
-            dynamic TECocinaPedidosConEstado = JsonConvert.DeserializeObject(TiempoEstimadoCocinaPedidosConEstado.JSON(true));
+            dynamic TECocinaPedidoActual = JsonConvert.DeserializeObject(TiempoEstimadoCocinaPedidoActual.JSON());
+            dynamic TECocinaPedidosConEstado = JsonConvert.DeserializeObject(TiempoEstimadoCocinaPedidosConEstado.JSON());
 
             int tiempoEntregaDelivery=0;
 
