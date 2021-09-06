@@ -306,8 +306,8 @@ namespace ElBuenSabor.Controllers
             pedido.Fecha = DateTime.Now;
 
             //Agrega fecha estimada de finalizacion
-            dynamic TECocinaPedidoActual = JsonConvert.DeserializeObject(TiempoEstimadoCocinaPedidoActual.JSON());
-            dynamic TECocinaPedidosConEstado = JsonConvert.DeserializeObject(TiempoEstimadoCocinaPedidosConEstado.JSON());
+            dynamic TECocinaPedidoActual = JsonConvert.DeserializeObject(TiempoEstimadoCocinaPedidoActual.JSON(true));
+            dynamic TECocinaPedidosConEstado = JsonConvert.DeserializeObject(TiempoEstimadoCocinaPedidosConEstado.JSON(true));
 
             int tiempoEntregaDelivery=0;
 
@@ -321,7 +321,10 @@ namespace ElBuenSabor.Controllers
             Configuracion configuracion = await _context.Configuraciones.FirstOrDefaultAsync();
             int CocinerosCant = configuracion.CantidadCocineros;
 
-            long FormulaTE= TECocinaPedidoActual.min + TECocinaPedidosConEstado.min / CocinerosCant  + tiempoEntregaDelivery ;
+            // Si el pedido no tiene un art. manuf. TECPA.min da null (cuando se pide una cerverza y nada mas)
+            long TECPA = TECocinaPedidoActual.min == null ? 0 : long.Parse(Convert.ToString(TECocinaPedidoActual.min));
+            long TECPCE = TECocinaPedidosConEstado.min == null ? 0 :  long.Parse(Convert.ToString(TECocinaPedidosConEstado.min));
+            long FormulaTE = TECPA + TECPCE / CocinerosCant  + tiempoEntregaDelivery ;
 
 
             //Calcular total del pedido 

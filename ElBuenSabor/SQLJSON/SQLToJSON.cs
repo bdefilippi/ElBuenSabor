@@ -34,9 +34,10 @@ namespace ElBuenSabor
             jSON += SQLQuery(SQLquery); //  Arma  [{},{},{}] o {}
         }
 
-        public string JSON()
+        public string JSON(bool noDobleMustache=false)
         {
-            
+            if (noDobleMustache)
+                 return jSON.Replace("}{", ",").Replace("[[", "[").Replace("]]", "]").Replace("{{", "{").Replace("}}", "}");
             return jSON.Replace("}{", ",").Replace("[[", "[").Replace("]]", "]"); // Une los objetos quitando las divisiones interrnas
         }
 
