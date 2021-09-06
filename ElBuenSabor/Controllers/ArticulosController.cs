@@ -267,8 +267,8 @@ namespace ElBuenSabor.Controllers
         public IActionResult GetImage(string fileName)
         {
 
-            string path = Path.Combine(_environment.ContentRootPath, "wwwroot/images/" + fileName);
-            string defaultPath = Path.Combine(_environment.ContentRootPath, "wwwroot/images/" + "default.png");
+            string path = Path.Combine(_environment.ContentRootPath, "../ebsa/wwwroot/images/" + fileName);
+            string defaultPath = Path.Combine(_environment.ContentRootPath, "../ebsa/wwwroot/images/" + "default.png");
             Console.WriteLine(fileName);
             try
             {
@@ -295,7 +295,7 @@ namespace ElBuenSabor.Controllers
         {
             string imageName = new string(Path.GetFileNameWithoutExtension(imageFile.FileName).Take(10).ToArray()).Replace(" ", "-");
             imageName = imageName + DateTime.Now.ToString("yymmssfff") + Path.GetExtension(imageFile.FileName);
-            var imagePath = Path.Combine(_environment.ContentRootPath, "wwwroot/images/", imageName);
+            var imagePath = Path.Combine(_environment.ContentRootPath, "../ebsa/wwwroot/images/", imageName);
             using (var fileStream = new FileStream(imagePath, FileMode.Create))
             {
                 await imageFile.CopyToAsync(fileStream);
@@ -307,7 +307,7 @@ namespace ElBuenSabor.Controllers
         [NonAction]
         public void DeleteImage(string imageName)
         {
-            var imagePath = Path.Combine(_environment.ContentRootPath, "wwwroot/images/", imageName);
+            var imagePath = Path.Combine(_environment.ContentRootPath, "../ebsa/wwwroot/images/", imageName);
             if (System.IO.File.Exists(imagePath))
             {
                 System.IO.File.Delete(imagePath);

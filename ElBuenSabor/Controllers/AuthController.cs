@@ -109,7 +109,7 @@ namespace ElBuenSabor.Controllers
                 //***...then LOGIN***
                 //Then it creates an access token that grants access to the other APIs of your app.
                 authRequest.NombreUsuario = payload.Email;
-                authRequest.Clave = hashCommonPassword;
+                authRequest.Clave = _CommonPassSettings.Pass;
 
                 authResponse = _authService.Authorize(authRequest);
 
