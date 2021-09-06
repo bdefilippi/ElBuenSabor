@@ -32,7 +32,7 @@ namespace ElBuenSabor
         public void Agregar(String SQLquery, bool forceArray=false)
         {
             jSON += SQLQuery(SQLquery); //  Arma  [{},{},{}] o {}
-            if (forceArray && !jSON.StartsWith('['));
+            if (forceArray && !jSON.StartsWith('['))
                 jSON = "[" + jSON + "]";
         }
 
