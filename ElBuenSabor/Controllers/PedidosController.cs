@@ -182,6 +182,12 @@ namespace ElBuenSabor.Controllers
                     EnviarNotificacionCliente(grupoDestino, mensaje, pedidoDTO);
                     break;
 
+                case (a: APROBADO, b: COCINANDO):
+                    mensaje = "El cocinero comenzó a cocinar el pedido";
+                    grupoDestino = _context.Roles.Where(r => r.Nombre == "Cajero").FirstOrDefault().Id.ToString();
+                    EnviarNotificacionRol(grupoDestino, mensaje, pedidoDTO);
+                    break;
+
                 case (a: CANCELADO, b: PENDIENTE):
                     mensaje = "Su pedido esta pendiente de aprobacion";
                     grupoDestino = pedido.ClienteID.ToString();

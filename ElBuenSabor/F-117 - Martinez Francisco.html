@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Factura</title>
+</head>
+
+<body class="general">
+
+    <div id="tipoDeFactura">
+        <span id="letraFactura">
+            <h1>A</h1>
+        </span>
+        <span id="codigoFactura">COD. 01</span>
+    </div>
+
+    <table class="tabla">
+        <tr>
+            <td class="razonSocialIzq">
+                <h1 class="nombreFantasia">EL BUEN SABOR</h1>
+
+                <p>
+                <h3 class="enlinea">Razón Social: </h3> <span>Corporacion Alimento SA</span></p>
+
+                <p>
+                <h3 class="enlinea">Domicilio Comercial: </h3> <span>Av.BuenSabor 2021, Capital Mendoza</span></p>
+
+                <p>
+                <h3 class="enlinea">Condición frente al IVA: </h3> <span>Responsable inscripto</span></p>
+            </td>
+            <td class="razonSocialDer">
+                <h1 class="tituloFACTURA">FACTURA</h1>
+                <p>
+                <h3 class="enlinea">Punto de Venta: </h3> <span>0001</span>
+                <h3 class="enlinea">Comp. Nro: </h3> <span>117</span>
+                </p>
+                <p>
+                <h3 class="enlinea">Fecha de Emisión: </h3> <span>06/09/2021 1:26:37</span></p>
+                <p>
+                <h3 class="enlinea">CUIT: </h3> <span>27916452331</span></p>
+                <p>
+                <h3 class="enlinea">Ingresos Brutos: </h3> <span>0654121</span></p>
+                <p>
+                <h3 class="enlinea">Fecha de Inicio de Actividades: </h3> <span>02/09/2021</span></p>
+            </td>
+        </tr>
+    </table>
+
+
+
+    <table class="tabla tablaCliente">
+        <tr>
+            <td>
+                <!-- <p>
+                <h3 class="enlinea">DNI: </h3> <span>[DNI]</span>
+                </p> -->
+                <p>
+                <h3 class="enlinea">Condicion frente al IVA: </h3> <span> Consumidor final</span>
+                </p>
+                <p>
+                <h3 class="enlinea">Condición de venta: </h3> <span>mercadoPago</span>
+                </p>
+            </td>
+            <td style=" vertical-align: top;">
+                <p>
+                <h3 class="enlinea">Apellido y Nombre: </h3> <span>Martinez, Francisco</span>
+                </p>
+                <p>
+                <h3 class="enlinea">Domicilio: </h3> <span>San Martin 3000, Ciudad</span>
+                </p>
+
+            </td>
+        </tr>
+    </table>
+
+
+    <table class="tabla ">
+        <tr class="encabezado tablaPrincipal">
+            <td class="encabezadoCelda">
+                Código
+            </td>
+            <td class="encabezadoCelda">
+                Producto / Servicio
+            </td>
+            <td class="encabezadoCelda">
+                Cantidad
+            </td>
+            <td class="encabezadoCelda">
+                U. Medida
+            </td>
+            <td class="encabezadoCelda">
+                Precio Unit.
+            </td>
+            <td class="encabezadoCelda" style="border: 0px;">
+                Subtotal
+            </td>
+        </tr>
+
+    </table>
+
+    <table class="tabla" style="border: 0px;">
+        <tr class="tablaPrincipal">
+            <td style="text-align: center;">
+    1
+</td>
+<td style="text-align: center;">
+    Lomo Simple
+</td>
+<td style="text-align: center;">
+    1
+</td>
+<td style="text-align: center;">
+    unidad
+</td>
+<td style="text-align: right;">
+    22 &nbsp;
+</td>
+<td style="border: 0px; text-align: right;">
+    22 &nbsp;
+</td>
+        </tr>
+    </table>
+
+    <div class="pie">
+        <span id="importeTotalTitulo">Importe Total: $ </span>
+        <span id="total">22</span>
+    </div>
+
+    <div class="actividadDiv">
+        <span id="actividad">"Venta de Alimentos"</span>
+    </div>
+
+    <style>
+        #total {
+            position: absolute;
+            /* left: calc(100% - 2.4cm); */
+            right: 1em;
+            font-weight: 800;
+            top: 50%;
+            transform: translateY(-0.5em);
+            text-align: right;
+            /* outline: 1px solid red; */
+        }
+
+        #importeTotalTitulo {
+            position: absolute;
+            right: 2.4cm;
+            font-weight: 800;
+            top: 50%;
+            transform: translateY(-0.5em);
+            text-align: left;
+            /* outline: 1px solid red; */
+        }
+
+        #actividad {
+            position: relative;
+            top: calc(50% - 0.5em);
+        }
+
+        .actividadDiv {
+            position: absolute;
+            width: 100%;
+            height: 2em;
+            left: 0px;
+            bottom: 2em;
+            border: 1px solid black;
+            text-align: center;
+        }
+
+        .pie {
+            background-color: lightgray;
+            position: absolute;
+            width: 100%;
+            height: 4em;
+            left: 0px;
+            bottom: 5em;
+        }
+
+        .general {
+            position: absolute;
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 80%;
+            margin-left: calc((793px - 20cm) / 2);
+            margin-top: calc((793px - 20cm) / 2);
+            /* margin-left: 1em; */
+            height: 27cm;
+            /* border: 1px solid black; */
+        }
+
+        .tablaCliente {
+            padding-left: 1em;
+        }
+
+        .tablaPrincipal {
+            display: grid;
+            grid-template-columns: 1.4cm 1fr 2.4cm 2.4cm 2.42cm 2.4cm;
+        }
+
+        .encabezadoCelda {
+            border-right: 1px solid black;
+            text-align: center;
+        }
+
+        .encabezado {
+            background-color: lightgrey;
+        }
+
+        #tipoDeFactura {
+            border: 1px solid black;
+            width: 3em;
+            position: absolute;
+            background-color: white;
+            margin-left: calc(10cm - 1.5em - 1px);
+            font-size: 105%;
+            text-align: center;
+        }
+
+        #letraFactura {
+            display: block;
+            text-align: center;
+        }
+
+        #codigoFactura {
+            font-size: 70%;
+        }
+
+        .tabla {
+            border: 1px solid black;
+            margin-bottom: 0.25em;
+            border-spacing: 0px;
+            width: 20cm;
+        }
+
+
+        .razonSocialIzq {
+            border-right: 1px solid black;
+            width: 10cm;
+            vertical-align: top;
+            padding-left: 1em;
+            box-sizing: border-box;
+        }
+
+        .razonSocialDer {
+            width: 10cm;
+            vertical-align: top;
+            padding-left: 3em;
+            box-sizing: border-box;
+        }
+
+        .nombreFantasia {
+            text-align: center;
+        }
+
+        .enlinea {
+            display: inline;
+        }
+
+        .tituloFACTURA {
+            text-align: left;
+        }
+    </style>
+
+</body>
+
+</html>
