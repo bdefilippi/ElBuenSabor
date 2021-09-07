@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ElBuenSabor.Models;
+using Newtonsoft.Json;
+using System.Net.Http;
 
 namespace ElBuenSabor.Controllers
 {
@@ -71,6 +73,31 @@ namespace ElBuenSabor.Controllers
 
             return NoContent();
         }
+
+        // POST: api/MercadoPagoDatos
+        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        [HttpPost]
+        public async Task<StatusCodeResult> PostMercadoPagoEstado([FromQuery] string topic,long id)
+        {
+
+            String urlApi = "https://api.mercadopago.com//v1/payments/" + id;
+            
+            using (var httpClient = new HttpClient())
+            {
+                using (var response = await httpClient.GetAsync(urlApi))
+                {
+                    string apiResponse = await response.Content.ReadAsStringAsync();
+                    dynamic reservationList = JsonConvert.DeserializeObject<dynamic>(apiResponse);
+                }
+            }
+
+            MercadoPagoDatos mercadoPagoDatos = new();
+            _context.MercadoPagoDatos.Add(mercadoPagoDatos);
+            await _context.SaveChangesAsync();
+
+            return StatusCode(200);
+        }
+
 
         // POST: api/MercadoPagoDatos
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754

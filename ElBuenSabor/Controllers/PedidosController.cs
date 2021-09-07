@@ -608,6 +608,7 @@ namespace ElBuenSabor.Controllers
             Console.WriteLine("Stock ante de egreso:");
             int cantidadQueFaltaEgresar = (int) cantidad;
             var stock = await _context.Stocks
+                .Include(a=>a.Articulo)
                 .Where(a => a.ArticuloID == articulo.Id)
                 .Where(b => b.CantidadDisponible > 0)
                 .Where(c => c.Disabled == false)
