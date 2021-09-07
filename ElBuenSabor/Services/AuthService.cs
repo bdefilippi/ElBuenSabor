@@ -30,15 +30,15 @@ namespace ElBuenSabor.Services
             _context = context;
         }
 
-        public AuthResponse Authorize(AuthRequest authRequest)
+        public async Task<AuthResponse> Authorize(AuthRequest authRequest)
         {
             AuthResponse authResponse = new();
             {
-                string spassword = Encrypt.GetSHA256(authRequest.Clave);
-                var usuario = _context.Usuarios
+                string spassword =  Encrypt.GetSHA256(authRequest.Clave);
+                var usuario = await _context.Usuarios
                     .Include(r => r.Rol)
                     .Where(u => u.NombreUsuario == authRequest.NombreUsuario && u.Clave == spassword)
-                    .FirstOrDefault();
+                    .FirstOrDefaultAsync();
                 if (usuario == null) return null;
 
                 var cliente = _context.Clientes
@@ -70,7 +70,7 @@ namespace ElBuenSabor.Services
                
 
             }
-            return authResponse;
+            return  authResponse;
         }
 
         private string CreateUserAuthToken(Usuario usuario)

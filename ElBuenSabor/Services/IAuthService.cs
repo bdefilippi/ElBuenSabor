@@ -9,6 +9,6 @@ namespace ElBuenSabor.Services
 {
     public interface IAuthService
     {
-        AuthResponse Authorize(AuthRequest model);
+        Task<AuthResponse> Authorize(AuthRequest model);
     }
 }

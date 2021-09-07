@@ -34,11 +34,11 @@ namespace ElBuenSabor.Controllers
         
         //-------------------- autenticacion--------------
         [HttpPost("login")]
-        public IActionResult Autentificar([FromBody] AuthRequest authRequest)
+        public async Task<IActionResult> Autentificar([FromBody] AuthRequest authRequest)
         {
 
             //quiero que genere un authResponse cuando se autentifique
-            var authResponse = _authService.Authorize(authRequest);
+            var authResponse = await _authService.Authorize(authRequest);
 
             if (authResponse == null)
             {
@@ -55,7 +55,7 @@ namespace ElBuenSabor.Controllers
 
         //--------------------Google autenticacion--------------
         [HttpPost("googlelogin")]
-        public IActionResult GoogleAutentificar([FromBody] GoogleAuthRequest googleAuthRequest)
+        public async Task<IActionResult> GoogleAutentificar([FromBody] GoogleAuthRequest googleAuthRequest)
         {
             AuthRequest authRequest = new();
             AuthResponse authResponse = new();
@@ -82,7 +82,7 @@ namespace ElBuenSabor.Controllers
                     authRequest.NombreUsuario = payload.Email;
                     authRequest.Clave = _CommonPassSettings.Pass;
 
-                    authResponse = _authService.Authorize(authRequest);
+                    authResponse = await _authService.Authorize(authRequest);
 
                     return Ok( _authService.Authorize(authRequest) );
                 }
@@ -111,7 +111,7 @@ namespace ElBuenSabor.Controllers
                 authRequest.NombreUsuario = payload.Email;
                 authRequest.Clave = _CommonPassSettings.Pass;
 
-                authResponse = _authService.Authorize(authRequest);
+                authResponse = await _authService.Authorize(authRequest);
 
                 return Ok(_authService.Authorize(authRequest) );
 

@@ -150,7 +150,7 @@ namespace ElBuenSabor.Controllers
 
             var parametros = new Dictionary<String, object>();
             parametros["@IdArticulo"] = id;
-            stockTotalParaArticulosManufacturados.Agregar("EXECUTE StockTotalParaArticulosManufacturados @IdArticulo", parametros);
+            stockTotalParaArticulosManufacturados.Agregar("EXECUTE StockTotalParaArticulosManufacturados @IdArticulo", parametros, true);
             return stockTotalParaArticulosManufacturados.JSON();
         }
 
@@ -162,7 +162,7 @@ namespace ElBuenSabor.Controllers
 
             var parametros = new Dictionary<String, object>();
             parametros["@IdArticulo"] = id;
-            stockTotalParaArticulosNoManufacturados.Agregar("EXECUTE StockTotalParaArticulosNoManufacturados @IdArticulo", parametros);
+            stockTotalParaArticulosNoManufacturados.Agregar("EXECUTE StockTotalParaArticulosNoManufacturados @IdArticulo", parametros, true);
             return stockTotalParaArticulosNoManufacturados.JSON();
         }
 
@@ -176,7 +176,8 @@ namespace ElBuenSabor.Controllers
 
             ArticuloParaFront.Agregar("EXECUTE TodosLosArticulosAlaVentaParaFront", true);
             RecetaParaFront.Agregar("EXECUTE TodosLosIngredientesParaFront", true);
-            return SQLToJSON.VincularArrayDeJSON(ArticuloParaFront.JSON(), "id", RecetaParaFront.JSON(), "ArticuloID", "Ingredientes");
+            String resultado = SQLToJSON.VincularArrayDeJSON(ArticuloParaFront.JSON(), "id", RecetaParaFront.JSON(), "ArticuloID", "Ingredientes");
+            return resultado;
 
         }
 

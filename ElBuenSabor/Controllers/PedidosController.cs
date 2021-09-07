@@ -266,6 +266,12 @@ namespace ElBuenSabor.Controllers
             _context.Pedidos.Add(pedido);
             await _context.SaveChangesAsync();
 
+            Pedido pedidoNuevo = await _context.Pedidos.FindAsync(pedido.Id);
+            
+            pedidoNuevo.Numero = pedido.Id;
+            _context.Entry(pedidoNuevo).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
+
             return CreatedAtAction("GetPedido", new { id = pedido.Id }, pedido);
         }
 
@@ -438,7 +444,7 @@ namespace ElBuenSabor.Controllers
                     {
                             if (DR.Disabled==false)
                             {
-                            //await Egresar(DR.Articulo, DR.Cantidad, detalleFacturaNuevo.Id);
+                            await Egresar(DR.Articulo, DR.Cantidad, detalleFacturaNuevo.Id);
                             //Toma una ETERNIDAD para pedidos grandes
                             }
                     }

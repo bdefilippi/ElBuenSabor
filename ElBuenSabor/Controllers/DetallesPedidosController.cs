@@ -80,7 +80,7 @@ namespace ElBuenSabor.Controllers
         {
             //Llena el campo subtotal. No lo trae desde el front por seguridad
             dynamic articuloParaFront = JsonConvert.DeserializeObject(ArticulosController.GetArticuloParaFrontStatic(detallePedido.ArticuloID));
-            long PV = articuloParaFront.PrecioVenta == null ? 0 : long.Parse(Convert.ToString(articuloParaFront.PrecioVenta));
+            decimal PV = articuloParaFront.PrecioVenta == null ? 0 : decimal.Parse(Convert.ToString(articuloParaFront.PrecioVenta));
             detallePedido.Subtotal = PV * detallePedido.Cantidad;
 
             _context.DetallesPedidos.Add(detallePedido);
