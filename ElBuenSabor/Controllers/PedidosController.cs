@@ -436,20 +436,18 @@ namespace ElBuenSabor.Controllers
                 .AsNoTracking()
                 .FirstOrDefaultAsync(c => c.Id == detalleFactura.Id);
 
-            for (int i = 1; i <= detalleFacturaNuevo.DetallePedido.Cantidad; i++)
-            {
+
                 if (detalleFacturaNuevo.DetallePedido.Articulo.EsManufacturado)
                 {
                     foreach (var DR in detalleFacturaNuevo.DetallePedido.Articulo.Recetas.FirstOrDefault().DetallesRecetas)
                     {
-                            if (DR.Disabled==false)
-                            {
-                            await Egresar(DR.Articulo, DR.Cantidad, detalleFacturaNuevo.Id);
-                            //Toma una ETERNIDAD para pedidos grandes
-                            }
+                        if (DR.Disabled==false)
+                        {
+                        await Egresar(DR.Articulo, DR.Cantidad * detalleFacturaNuevo.DetallePedido.Cantidad, detalleFacturaNuevo.Id);
+                        //Toma una ETERNIDAD para pedidos grandes
+                        }
                     }
                 }
-            }
 
             }
 
@@ -513,7 +511,7 @@ namespace ElBuenSabor.Controllers
            
             foreach (var item in factura.Pedido.DetallesPedido)
             {
-                var templateDetalle = new HtmlTemplate(@"DetalleFactura.html");
+                var templateDetalle = new HtmlTemplate(@"DetalleFactura.txt");
                 var outputDetalle = templateDetalle.Render(new
                 {
                     CODIGO = Convert.ToString(item.ArticuloID),
@@ -527,7 +525,7 @@ namespace ElBuenSabor.Controllers
                     DetallesFactura += outputDetalle;
             }
 
-            var template = new HtmlTemplate(@"FacturaTemplate.html");
+            var template = new HtmlTemplate(@"FacturaTemplate.txt");
             var output = template.Render(new
             {
                 NUMERODEFACTURA =Convert.ToString( factura.Numero),
