@@ -285,7 +285,7 @@ namespace ElBuenSabor.Controllers
                 .Include(p => p.DetallesPedido)
                 .ThenInclude(d => d.Articulo)
                  .Include(p => p.Domicilio)
-                        .AsNoTracking()
+                        //.AsNoTracking()
                 .FirstOrDefaultAsync(c => c.Id == id);
 
             /*
@@ -343,7 +343,21 @@ namespace ElBuenSabor.Controllers
             PedidoTotalModificar(ref pedido);
 
             pedido.HoraEstimadaFin = pedido.Fecha.AddMinutes(FormulaTE);
-            await PutPedido(id, pedido);
+
+            //Los pedidos y sus detallesPedido se crean desabilitados inicialmente hasta que se finalizan
+            pedido.Disabled = false;
+
+            foreach (DetallePedido detallePedido in pedido.DetallesPedido)
+            {
+                detallePedido.Disabled = false;
+                _context.Entry(detallePedido).State = EntityState.Modified;
+            }
+
+            _context.Entry(pedido).State = EntityState.Modified;
+
+            await _context.SaveChangesAsync();
+
+                //await PutPedido(id, pedido);
 
             //-------notificacion
             String mensaje = "";
