@@ -404,6 +404,7 @@ namespace ElBuenSabor.Controllers
 
             //bool existeFacturaDelPedido = facturasController.GetFacturaDePedidoExiste(pedido.Id).Result.Value;
 
+            //Valida si la factura del pedido ya existe
             //if (!existeFacturaDelPedido)
             //{
             Factura factura = new();
@@ -438,6 +439,8 @@ namespace ElBuenSabor.Controllers
             _context.Entry(factura).State = EntityState.Modified;
             await _context.SaveChangesAsync();
 
+
+            //Egresar los detalles de factura
             foreach (var detalleFactura in factura.DetallesFactura)
             {
 
@@ -458,7 +461,6 @@ namespace ElBuenSabor.Controllers
                         if (DR.Disabled==false)
                         {
                         await Egresar(DR.Articulo, DR.Cantidad * detalleFacturaNuevo.DetallePedido.Cantidad, detalleFacturaNuevo.Id);
-                        //Toma una ETERNIDAD para pedidos grandes
                         }
                     }
                 }
@@ -472,9 +474,11 @@ namespace ElBuenSabor.Controllers
             .AsNoTracking()
             .FirstOrDefaultAsync(a => a.Id == factura.Id);
 
+            //Generar factura.PDF y enviar por email
             string facturaHtml = await FacturaToHTML(factura.Id);
             string facturaPDF = HTML2PDF(facturaHtml);
             SendMail(facturaNueva.Pedido.Cliente.Usuario.NombreUsuario, facturaPDF);
+
 
             //} //if (!existeFacturaDelPedido)
 
@@ -573,7 +577,7 @@ namespace ElBuenSabor.Controllers
             //string projectDirectory2 = Directory.GetParent(workingDirectory).Parent.Parent.FullName;
 
             // read parameters from the webpage
-            string url = workingDirectory + "\\" + facturaHtmlFileName;
+            string htmlPath = workingDirectory + "\\" + facturaHtmlFileName;
             string pdfFile = workingDirectory + "\\wwwroot\\PDF\\" + facturaHtmlFileName.Split(".")[0] + ".pdf";
 
             // instantiate the html to pdf converter
@@ -599,7 +603,7 @@ namespace ElBuenSabor.Controllers
             converter.Options.SecurityOptions.CanPrint = true;
 
             // convert the url to pdf
-            PdfDocument doc = converter.ConvertUrl(url);
+            PdfDocument doc = converter.ConvertUrl(htmlPath);
            
             // save pdf document
             doc.Save(pdfFile);
@@ -607,6 +611,9 @@ namespace ElBuenSabor.Controllers
             // close pdf document
             doc.Close();
 
+            //Borra el HTML temporal
+            System.IO.File.Delete(htmlPath);
+            
             return pdfFile;
 
         }
