@@ -172,8 +172,10 @@ namespace ElBuenSabor.Controllers
                     EnviarNotificacionRol(grupoDestino, mensaje, pedidoDTO);
                     
                     //si se aprueba el pedido, facturar el pedido
-                   await Facturar(pedidoParaDTO.Id);
-
+                  int resultado = await Facturar(pedidoParaDTO.Id);
+                    if (resultado == 409) {
+                        return StatusCode(409, "el pedido debe ser cancelado por falta de stock");
+                    }
                     break;
 
                 case (a: PENDIENTE, b: CANCELADO):
@@ -392,7 +394,7 @@ namespace ElBuenSabor.Controllers
             return (pedidoDTO);
         }
 
-        private async Task Facturar(long id)
+        private async Task <int> Facturar(long id)
         {
 
             var pedidoNuevo = await _context.Pedidos
@@ -460,7 +462,10 @@ namespace ElBuenSabor.Controllers
                     {
                         if (DR.Disabled==false)
                         {
-                        await Egresar(DR.Articulo, DR.Cantidad * detalleFacturaNuevo.DetallePedido.Cantidad, detalleFacturaNuevo.Id);
+                            int result = await Egresar(DR.Articulo, DR.Cantidad * detalleFacturaNuevo.DetallePedido.Cantidad, detalleFacturaNuevo.Id);
+                            if (result == 409) {
+                                return 409;
+                            }
                         }
                     }
                 }
@@ -481,7 +486,7 @@ namespace ElBuenSabor.Controllers
 
 
             //} //if (!existeFacturaDelPedido)
-
+            return 0;
         }
 
         private void SendMail(String correo, String attachmentFilePath )
@@ -618,7 +623,7 @@ namespace ElBuenSabor.Controllers
 
         }
 
-        private async Task Egresar(Articulo articulo, double cantidad, long DFid)
+        private async Task<int> Egresar(Articulo articulo, double cantidad, long DFid)
         {
             Console.WriteLine("  ");
             Console.WriteLine("-----------------------------------------------------");
@@ -643,7 +648,11 @@ namespace ElBuenSabor.Controllers
             {
 
                 EgresoArticulo egresoArticulo = new();
-                
+                if (stock.Count == 0) {
+                    Console.WriteLine("El pedido debe ser cancelado por no contar con el stock para satisfacerlo");
+                    return 409;
+
+                }
                 if (cantidadQueFaltaEgresar >= stock[i].CantidadDisponible)
                 {
                     cantidadQueFaltaEgresar -= stock[i].CantidadDisponible;
@@ -676,7 +685,7 @@ namespace ElBuenSabor.Controllers
                 Console.WriteLine("Fecha: " + item.FechaCompra + " - Articulo: " + item.Articulo.Denominacion + " - Cantidad: " + item.CantidadDisponible);
             }
 
-
+            return 0;
         }
 
 
