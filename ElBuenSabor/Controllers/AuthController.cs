@@ -130,6 +130,15 @@ namespace ElBuenSabor.Controllers
         public IActionResult RegistrarCliente([FromBody] RegistroRequest registroRequest)
         {
 
+            //***LOGIN***
+            //Revisa si el usuario figura en los registros de la base de datos, devuelve error
+            bool existe = _context.Usuarios.Any(u => u.NombreUsuario == registroRequest.Email);
+
+            if (existe)
+            {
+                return StatusCode(409 , "Error el E-mail ya existe");
+            }
+
             Usuario usuarioNuevo = new();
             Cliente clienteNuevo = new();
             try
