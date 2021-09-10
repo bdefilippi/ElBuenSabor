@@ -170,12 +170,14 @@ namespace ElBuenSabor.Controllers
                     mensaje = "Ingresó pedido a cocinar";
                     grupoDestino = _context.Roles.Where(r=>r.Nombre=="Cocinero").FirstOrDefault().Id.ToString() ;
                     EnviarNotificacionRol(grupoDestino, mensaje, pedidoDTO);
-                    
-                    //si se aprueba el pedido, facturar el pedido
-                  int resultado = await Facturar(pedidoParaDTO.Id);
-                    if (resultado == 409) {
+
+                    //Revisar si HayStock (puede haber entrado muchos pedidos juntos y no quedar stock aun si al momento de pedirlos si habia)
+                    if (! await HayStock(pedido.Id))
+                    {
                         return StatusCode(409, "el pedido debe ser cancelado por falta de stock");
                     }
+                    //si se aprueba el pedido, facturar el pedido
+                    await Facturar(pedidoParaDTO.Id);
                     break;
 
                 case (a: PENDIENTE, b: CANCELADO):
@@ -243,6 +245,41 @@ namespace ElBuenSabor.Controllers
             }
 
             return NoContent();
+        }
+
+        private async Task<bool> HayStock(long pedidoId)
+        {
+            Pedido pedido = await _context.Pedidos
+             .Include(x => x.DetallesPedido)
+             .ThenInclude(x => x.Articulo)
+             .ThenInclude(x => x.Recetas)
+             .ThenInclude(x => x.DetallesRecetas)
+             .ThenInclude(x => x.Articulo)
+             .ThenInclude(x => x.Stocks)
+             .AsNoTracking()
+             .FirstOrDefaultAsync(x => x.Id == pedidoId);
+
+            foreach (var detallePedido in pedido.DetallesPedido)
+            {
+                int cantDetallePedido = detallePedido.Cantidad;
+
+                if (detallePedido.Articulo.EsManufacturado)
+                {
+                    foreach (var detalleReceta in detallePedido.Articulo.Recetas.FirstOrDefault().DetallesRecetas)
+                    {
+                        long CantTotal = 0;
+                        foreach (var stock in detalleReceta.Articulo.Stocks)
+                        {
+                            CantTotal += stock.CantidadDisponible;
+                        }
+                        if (cantDetallePedido * CantTotal < detalleReceta.Cantidad* cantDetallePedido)
+                        {
+                            return false;
+                        }
+                    }
+                }
+            }
+            return true;
         }
 
         private void EnviarNotificacionCliente(String grupoDestino, String mensaje, PedidoDTO pedido) { 
