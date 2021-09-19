@@ -55,15 +55,25 @@ namespace ElBuenSabor.Controllers
             return usuario;
         }
 
-        // PUT: api/Usuarios/5
+        // PUT: api/Usuarios
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutUsuario(long id, Usuario usuario)
+        [HttpPut]
+        public async Task<IActionResult> PutUsuario(UsuarioChange usuarioChange)
         {
-            if (id != usuario.Id)
+
+            //Revisa si el usuario figura en los registros de la base de datos
+            string hashPassword = Encrypt.GetSHA256(usuarioChange.ClaveVieja);
+            bool existe = _context.Usuarios.Any(u => u.NombreUsuario == usuarioChange.NombreUsuarioViejo && u.Clave == hashPassword);
+
+            if (!existe)
             {
                 return BadRequest();
             }
+
+            Usuario usuario = _context.Usuarios.Where(x => x.NombreUsuario == usuarioChange.NombreUsuarioViejo).FirstOrDefault();
+
+            usuario.NombreUsuario = usuarioChange.NombreUsuarioNuevo;
+            usuario.Clave = Encrypt.GetSHA256(usuarioChange.ClaveNueva);
 
             _context.Entry(usuario).State = EntityState.Modified;
 
@@ -73,15 +83,8 @@ namespace ElBuenSabor.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!UsuarioExists(id))
-                {
                     return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+                            }
 
             return NoContent();
         }

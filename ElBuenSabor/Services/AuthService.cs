@@ -35,10 +35,25 @@ namespace ElBuenSabor.Services
             AuthResponse authResponse = new();
             {
                 string spassword =  Encrypt.GetSHA256(authRequest.Clave);
+
+                //Si el Admin creo una cuenta con password = "0" entonces con lo primero que se loggue será la contraseña
+                var usuarioSinPassword = await _context.Usuarios
+                    .Include(r => r.Rol)
+                    .Where(u => u.NombreUsuario == authRequest.NombreUsuario && u.Clave == "0")
+                    .FirstOrDefaultAsync();
+                
+                if (usuarioSinPassword != null)
+                {
+                    usuarioSinPassword.Clave = spassword;
+                    _context.Entry(usuarioSinPassword).State = EntityState.Modified;
+                    await _context.SaveChangesAsync();
+                }
+
                 var usuario = await _context.Usuarios
                     .Include(r => r.Rol)
                     .Where(u => u.NombreUsuario == authRequest.NombreUsuario && u.Clave == spassword)
                     .FirstOrDefaultAsync();
+
                 if (usuario == null) return null;
 
                 var cliente = _context.Clientes
