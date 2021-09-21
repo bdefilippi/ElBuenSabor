@@ -29,8 +29,8 @@ namespace ElBuenSabor.Controllers
         }
 
         // GET: api/Facturas/PDF/5
-        [HttpGet("PDF/{id}")]
-        public async Task<ActionResult> DownloadFile(long id)
+        [HttpGet("PDF/{pedidoId}")]
+        public async Task<ActionResult> DownloadFile(long pedidoId)
         {
             Factura factura = await _context.Facturas
             .Include(a => a.Pedido)
@@ -39,7 +39,8 @@ namespace ElBuenSabor.Controllers
             .Include(a => a.Pedido.Domicilio)
             .Include(a => a.Pedido.Cliente)
             .AsNoTracking()
-            .FirstOrDefaultAsync(a => a.Id == id);
+            .Where(a=>a.PedidoID== pedidoId)
+            .FirstOrDefaultAsync();
 
             string workingDirectory = Environment.CurrentDirectory + "\\wwwroot\\PDF\\";
             String fileName = @"F-" + Convert.ToString(factura.Numero) + " - " + factura.Pedido.Cliente.Apellido + " " + factura.Pedido.Cliente.Nombre + ".pdf";

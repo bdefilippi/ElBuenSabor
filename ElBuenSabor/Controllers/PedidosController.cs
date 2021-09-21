@@ -743,7 +743,7 @@ namespace ElBuenSabor.Controllers
                         Title = "Carrito",
                         Quantity = 1,
                         CurrencyId = "ARS",
-                        UnitPrice = preferencia.total,
+                        UnitPrice = preferencia.total ,
                     },
                 },
                 BackUrls = new PreferenceBackUrlsRequest
