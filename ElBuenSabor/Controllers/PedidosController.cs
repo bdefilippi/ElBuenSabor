@@ -640,8 +640,8 @@ namespace ElBuenSabor.Controllers
             //string projectDirectory2 = Directory.GetParent(workingDirectory).Parent.Parent.FullName;
 
             // read parameters from the webpage
-            string htmlPath = workingDirectory + "\\" + facturaHtmlFileName;
-            string pdfFile = workingDirectory + "\\wwwroot\\PDF\\" + facturaHtmlFileName.Split(".")[0] + ".pdf";
+            string htmlPath = facturaHtmlFileName;
+            string pdfFile = facturaHtmlFileName.Split(".")[0] + ".pdf";
 
             // instantiate the html to pdf converter
             HtmlToPdf converter = new HtmlToPdf();
