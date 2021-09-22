@@ -41,7 +41,7 @@ namespace ElBuenSabor.Controllers
             .AsNoTracking()
             .Where(a=>a.PedidoID== pedidoId)
             .FirstOrDefaultAsync();
-
+            
             string workingDirectory = Environment.CurrentDirectory + "\\wwwroot\\PDF\\";
             String fileName = @"F-" + Convert.ToString(factura.Numero) + " - " + factura.Pedido.Cliente.Apellido + " " + factura.Pedido.Cliente.Nombre + ".pdf";
             String filePath = workingDirectory + fileName;

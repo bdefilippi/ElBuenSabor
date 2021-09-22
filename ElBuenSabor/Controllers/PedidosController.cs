@@ -65,8 +65,17 @@ namespace ElBuenSabor.Controllers
             return pedidos;
         }
 
-        // GET: api/Pedidos/5
-        [HttpGet("{id}")]
+        // GET: api/Pedidos/ruta
+        [HttpGet("ruta")]
+        public async Task<string> Ruta(long id)
+        {
+            string workingDirectory = Environment.CurrentDirectory;
+            return workingDirectory;
+        }
+
+
+            // GET: api/Pedidos/5
+            [HttpGet("{id}")]
         public async Task<ActionResult<Pedido>> GetPedido(long id)
         {
 
@@ -515,6 +524,8 @@ namespace ElBuenSabor.Controllers
             .ThenInclude(a => a.Usuario)
             .AsNoTracking()
             .FirstOrDefaultAsync(a => a.Id == factura.Id);
+
+            //Path.Combine(_hostEnvironment.ContentRootPath, "wwwroot/images/", imageName)
 
             //Generar factura.PDF y enviar por email
             string facturaHtml = await FacturaToHTML(factura.Id);
