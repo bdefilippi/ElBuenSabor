@@ -458,7 +458,7 @@ namespace ElBuenSabor.Controllers
             //{
             Factura factura = new();
                 factura.Fecha = DateTime.Now;
-                factura.MontoDescuento = Convert.ToSingle(PedidoMontoDescuentoCalcular(pedidoNuevo));
+                factura.MontoDescuento = Convert.ToDecimal(PedidoMontoDescuentoCalcular(pedidoNuevo));
                 factura.PedidoID = pedidoNuevo.Id;
                 factura.Total = Convert.ToDecimal(PedidoTotalCalcular(pedidoNuevo));
                 factura.DetallesFactura = new List<DetalleFactura>();
