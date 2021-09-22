@@ -582,7 +582,7 @@ namespace ElBuenSabor.Controllers
 
             String DetallesFactura = "";
 
-                string workingDirectory = Environment.CurrentDirectory + "\\wwwroot\\";
+                string workingDirectory = Environment.CurrentDirectory + "\\wwwroot\\PDF\\";
 
                 foreach (var item in factura.Pedido.DetallesPedido)
             {
