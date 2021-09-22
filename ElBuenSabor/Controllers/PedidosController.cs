@@ -581,10 +581,12 @@ namespace ElBuenSabor.Controllers
                 .FirstOrDefaultAsync(a => a.Id == id);
 
             String DetallesFactura = "";
-           
-            foreach (var item in factura.Pedido.DetallesPedido)
+
+                string workingDirectory = Environment.CurrentDirectory + "\\wwwroot\\";
+
+                foreach (var item in factura.Pedido.DetallesPedido)
             {
-                var templateDetalle = new HtmlTemplate(@"DetalleFactura.txt");
+                var templateDetalle = new HtmlTemplate(workingDirectory + "DetalleFactura.txt");
                 var outputDetalle = templateDetalle.Render(new
                 {
                     CODIGO = Convert.ToString(item.ArticuloID),
@@ -598,7 +600,7 @@ namespace ElBuenSabor.Controllers
                     DetallesFactura += outputDetalle;
             }
 
-            var template = new HtmlTemplate(@"FacturaTemplate.txt");
+            var template = new HtmlTemplate(workingDirectory + "FacturaTemplate.txt");
             var output = template.Render(new
             {
                 NUMERODEFACTURA =Convert.ToString( factura.Numero),
@@ -610,7 +612,7 @@ namespace ElBuenSabor.Controllers
                 DETALLESDEFACTURA = DetallesFactura
             }); ;
 
-            String newHtmlPath = @"F-" + Convert.ToString(factura.Numero) + " - " + factura.Pedido.Cliente.Apellido + " " + factura.Pedido.Cliente.Nombre + ".html";
+            String newHtmlPath = workingDirectory + "F-" + Convert.ToString(factura.Numero) + " - " + factura.Pedido.Cliente.Apellido + " " + factura.Pedido.Cliente.Nombre + ".html";
 
             using (StreamWriter writetext = new StreamWriter(newHtmlPath))
             {
