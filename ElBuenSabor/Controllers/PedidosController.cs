@@ -44,7 +44,8 @@ namespace ElBuenSabor.Controllers
 
         const int LOCAL = 0;
         const int DOMICILIO = 1;
-    
+
+        private string depuracion;
 
         public PedidosController(ElBuenSaborContext context, IHubContext<NotificacionesAClienteHub> notificacionesAClienteHub)
         {
@@ -440,7 +441,7 @@ namespace ElBuenSabor.Controllers
             return (pedidoDTO);
         }
 
-        private async Task <int> Facturar(long id)
+        private async Task <string> Facturar(long id)
         {
 
             var pedidoNuevo = await _context.Pedidos
@@ -510,7 +511,7 @@ namespace ElBuenSabor.Controllers
                         {
                             int result = await Egresar(DR.Articulo, DR.Cantidad * detalleFacturaNuevo.DetallePedido.Cantidad, detalleFacturaNuevo.Id);
                             if (result == 409) {
-                                return 409;
+                                return "409";
                             }
                         }
                     }
@@ -534,7 +535,8 @@ namespace ElBuenSabor.Controllers
 
 
             //} //if (!existeFacturaDelPedido)
-            return 0;
+            return facturaHtml;
+            //return 0;
         }
 
         private void SendMail(String correo, String attachmentFilePath )
@@ -568,7 +570,7 @@ namespace ElBuenSabor.Controllers
 
         private async Task<String> FacturaToHTML(long id)
         {
-
+            try { 
             Factura factura = await _context.Facturas
                 .Include(a => a.Pedido)
                     .ThenInclude(a => a.DetallesPedido)
@@ -614,8 +616,14 @@ namespace ElBuenSabor.Controllers
             {
                 writetext.WriteLine(output);
             }
+                return newHtmlPath;
+            }
+            catch (Exception e)
+            {
+                return e.Message;
+            }
 
-            return newHtmlPath;
+            
         }
 
         private String HTML2PDF(String facturaHtmlFileName)
