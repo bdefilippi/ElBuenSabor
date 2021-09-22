@@ -11,12 +11,12 @@ namespace ElBuenSabor.Models
         public long Id { get; set; }
         public long Numero { get; set; }
         public DateTime Fecha { get; set; }
-        public Double MontoDescuento { get; set; }
+        public decimal MontoDescuento { get; set; }
         public bool Disabled { get; set; }
         public long PedidoID { get; set; }
         public Pedido Pedido { get; set; }
         [NotMapped]
-        public double TotalCosto { get; set; }
+        public decimal TotalCosto { get; set; }
         public decimal Total { get; set; }
         public ICollection<DetalleFactura> DetallesFactura { get; set; }    //Es composicion
     }
