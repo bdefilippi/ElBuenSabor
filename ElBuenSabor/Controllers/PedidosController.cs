@@ -350,7 +350,7 @@ namespace ElBuenSabor.Controllers
             TiempoEstimadoCocinaPedidoActual.JSON();
 
             var parametroEstadoActual = new Dictionary<String, object>();
-            parametroEstadoActual["@estado"] = 0;
+            parametroEstadoActual["@estado"] = APROBADO;
             TiempoEstimadoCocinaPedidosConEstado.Agregar("EXECUTE TiempoEstimadoCocinaPedidosConEstado @estado", parametroEstadoActual);
             TiempoEstimadoCocinaPedidosConEstado.JSON();
 
