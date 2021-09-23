@@ -66,14 +66,6 @@ namespace ElBuenSabor.Controllers
             return pedidos;
         }
 
-        // GET: api/Pedidos/ruta
-        [HttpGet("ruta")]
-        public async Task<string> Ruta(long id)
-        {
-            string workingDirectory = Environment.CurrentDirectory;
-            return workingDirectory;
-        }
-
 
             // GET: api/Pedidos/5
             [HttpGet("{id}")]
@@ -451,12 +443,7 @@ namespace ElBuenSabor.Controllers
             .AsNoTracking()
             .FirstOrDefaultAsync(c => c.Id == id);
 
-            //bool existeFacturaDelPedido = facturasController.GetFacturaDePedidoExiste(pedido.Id).Result.Value;
-
-            //Valida si la factura del pedido ya existe
-            //if (!existeFacturaDelPedido)
-            //{
-            Factura factura = new();
+                Factura factura = new();
                 factura.Fecha = DateTime.Now;
                 factura.MontoDescuento = Convert.ToDecimal(PedidoMontoDescuentoCalcular(pedidoNuevo));
                 factura.PedidoID = pedidoNuevo.Id;
@@ -526,17 +513,14 @@ namespace ElBuenSabor.Controllers
             .AsNoTracking()
             .FirstOrDefaultAsync(a => a.Id == factura.Id);
 
-            //Path.Combine(_hostEnvironment.ContentRootPath, "wwwroot/images/", imageName)
-
             //Generar factura.PDF y enviar por email
             string facturaHtml = await FacturaToHTML(factura.Id);
             string facturaPDF = HTML2PDF(facturaHtml);
             SendMail(facturaNueva.Pedido.Cliente.Usuario.NombreUsuario, facturaPDF);
 
+                return facturaHtml;
+            
 
-            //} //if (!existeFacturaDelPedido)
-            return facturaHtml;
-            //return 0;
         }
 
         private void SendMail(String correo, String attachmentFilePath )
