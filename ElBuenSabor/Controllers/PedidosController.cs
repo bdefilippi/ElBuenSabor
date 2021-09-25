@@ -57,7 +57,10 @@ namespace ElBuenSabor.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Pedido>>> GetPedidos()
         {
-            var pedidos = await _context.Pedidos.Include(d=>d.DetallesPedido).ToListAsync();
+            var pedidos = await _context.Pedidos
+                .Include(d=>d.DetallesPedido)
+                .Include(x=>x.Cliente)
+                .ToListAsync();
             foreach (Pedido pedido in pedidos)
             {
                 pedido.Total = PedidoTotalCalcular(pedido);
