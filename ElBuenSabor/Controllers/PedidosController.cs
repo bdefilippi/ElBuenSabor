@@ -60,6 +60,7 @@ namespace ElBuenSabor.Controllers
             var pedidos = await _context.Pedidos
                 .Include(d=>d.DetallesPedido)
                 .Include(x=>x.Cliente)
+                .Where(p => p.Disabled == false)
                 .ToListAsync();
             foreach (Pedido pedido in pedidos)
             {
@@ -79,6 +80,8 @@ namespace ElBuenSabor.Controllers
                 .Include(p => p.Cliente)
                 .Include(p => p.DetallesPedido)
                 .ThenInclude(d=>d.Articulo)
+                .Include(p => p.Domicilio)
+                .Where(p=>p.Disabled==false)
                 .FirstOrDefaultAsync(c => c.Id == id);
 
             PedidoTotalModificar(ref pedido);
