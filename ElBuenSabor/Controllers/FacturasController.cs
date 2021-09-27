@@ -10,15 +10,15 @@ using System.Net.Http.Headers;
 using System.IO;
 using System.Net.Http;
 using System.Net;
+using Microsoft.AspNetCore.Authorization;
 
 namespace ElBuenSabor.Controllers
 {
 
-
-
-
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(Roles = "Cliente,Administrador,Cajero")]
+
     public class FacturasController : ControllerBase
     {
         private readonly ElBuenSaborContext _context;

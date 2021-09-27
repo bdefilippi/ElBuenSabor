@@ -6,11 +6,14 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ElBuenSabor.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace ElBuenSabor.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(Roles = "Cliente,Administrador,Cajero,Cocinero")]
+
     public class RolesController : ControllerBase
     {
         private readonly ElBuenSaborContext _context;
@@ -44,6 +47,7 @@ namespace ElBuenSabor.Controllers
         // PUT: api/Roles/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
+        [Authorize(Roles = "Administrador")]
         public async Task<IActionResult> PutRol(long id, Rol rol)
         {
             if (id != rol.Id)
@@ -75,6 +79,7 @@ namespace ElBuenSabor.Controllers
         // POST: api/Roles
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
+        [Authorize(Roles = "Administrador")]
         public async Task<ActionResult<Rol>> PostRol(Rol rol)
         {
             _context.Roles.Add(rol);
@@ -85,6 +90,7 @@ namespace ElBuenSabor.Controllers
 
         // DELETE: api/Roles/5
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Administrador")]
         public async Task<IActionResult> DeleteRol(long id)
         {
             var rol = await _context.Roles.FindAsync(id);

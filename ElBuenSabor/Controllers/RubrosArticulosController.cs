@@ -6,11 +6,13 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ElBuenSabor.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace ElBuenSabor.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    
     public class RubrosArticulosController : ControllerBase
     {
         private readonly ElBuenSaborContext _context;
@@ -46,6 +48,7 @@ namespace ElBuenSabor.Controllers
         // PUT: api/RubrosArticulos/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
+        [Authorize(Roles = "Administrador")]
         public async Task<IActionResult> PutRubroArticulo(long id, RubroArticulo rubroArticulo)
         {
             if (id != rubroArticulo.Id)
@@ -77,6 +80,7 @@ namespace ElBuenSabor.Controllers
         // POST: api/RubrosArticulos
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
+        [Authorize(Roles = "Administrador")]
         public async Task<ActionResult<RubroArticulo>> PostRubroArticulo(RubroArticulo rubroArticulo)
         {
             _context.RubrosArticulos.Add(rubroArticulo);
@@ -87,6 +91,7 @@ namespace ElBuenSabor.Controllers
 
         // DELETE: api/RubrosArticulos/5
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Administrador")]
         public async Task<IActionResult> DeleteRubroArticulo(long id)
         {
             var rubroArticulo = await _context.RubrosArticulos.FindAsync(id);

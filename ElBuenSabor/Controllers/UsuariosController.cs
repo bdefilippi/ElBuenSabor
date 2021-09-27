@@ -11,11 +11,14 @@ using ElBuenSabor.Services;
 using ElBuenSabor.Models.Response;
 using Google.Apis.Auth;
 using ElBuenSabor.Tools;
+using Microsoft.AspNetCore.Authorization;
 
 namespace ElBuenSabor.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(Roles = "Cliente,Administrador,Cajero,Cocinero")]
+
     public class UsuariosController : ControllerBase
     {
         private readonly ElBuenSaborContext _context;
@@ -58,6 +61,7 @@ namespace ElBuenSabor.Controllers
         // PUT: api/Usuarios
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut]
+        [Authorize(Roles = "Administrador")]
         public async Task<IActionResult> PutUsuario(UsuarioChange usuarioChange)
         {
 
@@ -92,6 +96,7 @@ namespace ElBuenSabor.Controllers
         // POST: api/Usuarios
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
+        [Authorize(Roles = "Administrador")]
         public async Task<ActionResult<Usuario>> PostUsuario(Usuario usuario)
         {
             _context.Usuarios.Add(usuario);
@@ -102,6 +107,7 @@ namespace ElBuenSabor.Controllers
 
         // DELETE: api/Usuarios/5
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Administrador")]
         public async Task<IActionResult> DeleteUsuario(long id)
         {
             var usuario = await _context.Usuarios.FindAsync(id);

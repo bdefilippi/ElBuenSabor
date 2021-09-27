@@ -21,11 +21,14 @@ using System.Net.Mail;
 using SelectPdf;
 using ElBuenSabor.Tools;
 using System.IO;
+using Microsoft.AspNetCore.Authorization;
 
 namespace ElBuenSabor.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(Roles = "Cliente,Administrador,Cajero,Cocinero")]
+
     public class PedidosController : ControllerBase
     {
         private readonly ElBuenSaborContext _context;

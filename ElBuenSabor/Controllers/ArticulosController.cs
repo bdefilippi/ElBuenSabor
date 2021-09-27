@@ -20,7 +20,7 @@ namespace ElBuenSabor.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    //[Authorize(Roles = "Usuario,Administrador,Cajero,Cocinero")]
+    //[Authorize(Roles = "Cliente,Administrador,Cajero,Cocinero")]
 
     public class ArticulosController : ControllerBase
     {
@@ -87,6 +87,7 @@ namespace ElBuenSabor.Controllers
         // PUT: api/Articulos/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
+        [Authorize(Roles = "Administrador")]
         public async Task<IActionResult> PutArticulo(long id, Articulo articulo)
         {
             if (id != articulo.Id)
@@ -124,6 +125,7 @@ namespace ElBuenSabor.Controllers
         // POST: api/Articulos
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
+        [Authorize(Roles = "Administrador")]
         public async Task<ActionResult<Articulo>> PostArticulo(Articulo articulo)
         {
             articulo.Imagen = await SaveImage(articulo.ImageFile);
@@ -204,6 +206,7 @@ namespace ElBuenSabor.Controllers
 
         // DELETE: api/Articulos/5
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Administrador")]
         public async Task<IActionResult> DeleteArticulo(long id)
         {
             var articulo = await _context.Articulos.FindAsync(id);
@@ -262,34 +265,6 @@ namespace ElBuenSabor.Controllers
         //    await PutArticulo(id, articulo);
         //    return true;
         //}
-
-        // GET: /api/Articulos/Image/default.png
-        [HttpGet("Image/{fileName}")]
-        public IActionResult GetImage(string fileName)
-        {
-
-            string path = Path.Combine(_environment.ContentRootPath, "../ebsa/wwwroot/images/" + fileName);
-            string defaultPath = Path.Combine(_environment.ContentRootPath, "../ebsa/wwwroot/images/" + "default.png");
-            Console.WriteLine(fileName);
-            try
-            {
-                var image = System.IO.File.OpenRead(path);
-                return File(image, "image/jpeg");
-            }
-            catch (Exception)
-            {
-            }
-
-            var imageDefault = System.IO.File.OpenRead(defaultPath);
-            return File(imageDefault, "image/jpeg");
-        }
-
-        // GET: /api/Articulos/Image/
-        [HttpGet("Image/")]
-        public IActionResult GetDefault()
-        {
-            return GetImage("");
-        }
 
         [NonAction]
         public async Task<string> SaveImage(IFormFile imageFile)

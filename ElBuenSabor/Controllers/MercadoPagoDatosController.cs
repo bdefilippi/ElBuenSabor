@@ -8,11 +8,14 @@ using Microsoft.EntityFrameworkCore;
 using ElBuenSabor.Models;
 using Newtonsoft.Json;
 using System.Net.Http;
+using Microsoft.AspNetCore.Authorization;
 
 namespace ElBuenSabor.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(Roles = "Cliente,Administrador,Cajero")]
+
     public class MercadoPagoDatosController : ControllerBase
     {
         private readonly ElBuenSaborContext _context;

@@ -6,11 +6,14 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ElBuenSabor.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace ElBuenSabor.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(Roles = "Administrador,Cajero,Cocinero")]
+
     public class StocksController : ControllerBase
     {
         private readonly ElBuenSaborContext _context;
@@ -44,6 +47,7 @@ namespace ElBuenSabor.Controllers
         // PUT: api/Stocks/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
+        [Authorize(Roles = "Administrador")]
         public async Task<IActionResult> PutStock(long id, Stock stock)
         {
             if (id != stock.Id)
@@ -75,6 +79,7 @@ namespace ElBuenSabor.Controllers
         // POST: api/Stocks
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
+        [Authorize(Roles = "Administrador")]
         public async Task<ActionResult<Stock>> PostStock(Stock stock)
         {
             _context.Stocks.Add(stock);
@@ -85,6 +90,7 @@ namespace ElBuenSabor.Controllers
 
         // DELETE: api/Stocks/5
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Administrador")]
         public async Task<IActionResult> DeleteStock(long id)
         {
             var stock = await _context.Stocks.FindAsync(id);

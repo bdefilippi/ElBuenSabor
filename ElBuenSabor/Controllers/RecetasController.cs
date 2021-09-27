@@ -6,11 +6,15 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ElBuenSabor.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace ElBuenSabor.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(Roles = "Cliente,Administrador,Cajero,Cocinero")]
+    
+
     public class RecetasController : ControllerBase
     {
         private readonly ElBuenSaborContext _context;
@@ -45,6 +49,7 @@ namespace ElBuenSabor.Controllers
         // PUT: api/Recetas/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
+        [Authorize(Roles = "Administrador,Cocinero")]
         public async Task<IActionResult> PutReceta(long id, Receta receta)
         {
             if (id != receta.Id)
@@ -76,6 +81,7 @@ namespace ElBuenSabor.Controllers
         // POST: api/Recetas
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
+        [Authorize(Roles = "Administrador,Cocinero")]
         public async Task<ActionResult<Receta>> PostReceta(Receta receta)
         {
             _context.Recetas.Add(receta);
@@ -86,6 +92,7 @@ namespace ElBuenSabor.Controllers
 
         // DELETE: api/Recetas/5
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Administrador,Cocinero")]
         public async Task<IActionResult> DeleteReceta(long id)
         {
             var receta = await _context.Recetas.FindAsync(id);
