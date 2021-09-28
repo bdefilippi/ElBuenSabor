@@ -166,7 +166,7 @@ namespace ElBuenSabor
             app.UseRouting();
 
             app.UseCors(options => {
-                options.WithOrigins("http://localhost:8080");
+                options.WithOrigins("https://gustavovergara87.github.io/BuenSaborVUE");
                 //options.AllowAnyOrigin();
                 options.AllowAnyHeader();
                 options.AllowAnyMethod();

@@ -48,7 +48,6 @@ namespace ElBuenSabor.Controllers
         const int LOCAL = 0;
         const int DOMICILIO = 1;
 
-        private string depuracion;
 
         public PedidosController(ElBuenSaborContext context, IHubContext<NotificacionesAClienteHub> notificacionesAClienteHub)
         {
