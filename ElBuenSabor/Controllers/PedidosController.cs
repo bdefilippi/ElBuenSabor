@@ -37,7 +37,7 @@ namespace ElBuenSabor.Controllers
 
         const int PAGO_PENDIENTE_MP = -1;
         const int PENDIENTE = 0;
-        const int APROBADO = 1;
+        const int APROBADO = 1; //Esperando Preparacion 
         const int LISTO_ENTREGA_LOCAL = 2;
         const int TERMINADO = 3;
         const int PENDIENTE_ENTREGA = 4;
@@ -510,6 +510,18 @@ namespace ElBuenSabor.Controllers
                             }
                         }
                     }
+                }
+                else
+                {
+                    if (detalleFacturaNuevo.DetallePedido.Articulo.Disabled == false)
+                    {
+                        int result = await Egresar(detalleFacturaNuevo.DetallePedido.Articulo, detalleFacturaNuevo.DetallePedido.Cantidad, detalleFacturaNuevo.Id);
+                        if (result == 409)
+                        {
+                            return "409";
+                        }
+                    }
+
                 }
 
             }
