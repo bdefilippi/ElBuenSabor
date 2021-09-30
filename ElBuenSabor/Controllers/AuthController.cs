@@ -113,7 +113,7 @@ namespace ElBuenSabor.Controllers
 
                 authResponse = await _authService.Authorize(authRequest);
 
-                return Ok(_authService.Authorize(authRequest) );
+                return Ok(authResponse);
 
             }
             catch
