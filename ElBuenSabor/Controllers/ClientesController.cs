@@ -12,7 +12,7 @@ namespace ElBuenSabor.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize(Roles = "Cliente,Administrador")]
+    [Authorize(Roles = "Cliente,Administrador,Cajero")]
 
     public class ClientesController : ControllerBase
     {
