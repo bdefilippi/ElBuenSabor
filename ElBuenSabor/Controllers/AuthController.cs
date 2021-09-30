@@ -74,7 +74,7 @@ namespace ElBuenSabor.Controllers
                 //***LOGIN***
                 //Revisa si el usuario figura en los registros de la base de datos, si es asi lo logea
                 string hashCommonPassword = Encrypt.GetSHA256(_CommonPassSettings.Pass);
-                bool existe = _context.Usuarios.Any(u => u.NombreUsuario == payload.Email && u.Clave == hashCommonPassword);
+                bool existe = _context.Usuarios.Any(u => u.NombreUsuario == payload.Email && u.Clave == hashCommonPassword && u.Disabled.Equals(false));
 
                 if (existe)
                 {
