@@ -593,8 +593,8 @@ namespace ElBuenSabor.Controllers
             }
 
                 
-                var templateDetalle = new HtmlTemplate(workingDirectory + "DetalleFactura.txt");
-                var outputDetalle = templateDetalle.Render(new
+                var templateDetalle1 = new HtmlTemplate(workingDirectory + "DetalleFactura.txt");
+                var outputDetalle1 = templateDetalle1.Render(new
                 {
                     CODIGO = "00",
                     PRODUCTO = "Descuento",
@@ -604,7 +604,7 @@ namespace ElBuenSabor.Controllers
                     SUBTOTAL = Convert.ToString(factura.MontoDescuento),
                 });
 
-                DetallesFactura += outputDetalle;
+                DetallesFactura += outputDetalle1;
 
 
 
