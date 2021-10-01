@@ -242,12 +242,20 @@ namespace ElBuenSabor.Controllers
                     mensaje = "Esperamos que disfrute su pedido!";
                     grupoDestino = pedido.ClienteID.ToString();
                     EnviarNotificacionCliente(grupoDestino, mensaje, pedidoDTO);
+
+                    mensaje = "Pedido entregado";
+                    grupoDestino = _context.Roles.Where(r => r.Nombre == "Cocinero").FirstOrDefault().Id.ToString();
+                    EnviarNotificacionRol(grupoDestino, mensaje, pedidoDTO);
                     break;
 
                 case (a: PENDIENTE_ENTREGA, b: ENTREGADO):
                     mensaje = "Su pedido fue entregado!";
                     grupoDestino = pedido.ClienteID.ToString();
                     EnviarNotificacionCliente(grupoDestino, mensaje, pedidoDTO);
+
+                    mensaje = "Pedido entregado";
+                    grupoDestino = _context.Roles.Where(r => r.Nombre == "Cocinero").FirstOrDefault().Id.ToString();
+                    EnviarNotificacionRol(grupoDestino, mensaje, pedidoDTO);
                     break;
 
                 default:
