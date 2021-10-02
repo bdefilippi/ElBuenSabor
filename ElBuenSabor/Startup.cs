@@ -171,6 +171,7 @@ namespace ElBuenSabor
                 options.AllowAnyHeader();
                 options.AllowAnyMethod();
                 options.AllowCredentials(); //no se puede habilitar cualquier credencial y cualquier origen al mismo tiempo. No se por qué
+                options.WithExposedHeaders("Content-Disposition"); //permite enviar el filename en el header de la respuesta de modo que un fetch pueda leerlo. Se usa cuando se bajan facturas usando fetch
             });
 
             app.UseAuthentication(); //necesario para poder usar el jwt agregado authorize a los controllers

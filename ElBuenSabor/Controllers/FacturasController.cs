@@ -11,6 +11,7 @@ using System.IO;
 using System.Net.Http;
 using System.Net;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.Net.Http.Headers;
 
 namespace ElBuenSabor.Controllers
 {
@@ -46,8 +47,16 @@ namespace ElBuenSabor.Controllers
             String fileName = @"F-" + Convert.ToString(factura.Numero) + " - " + factura.Pedido.Cliente.Apellido + " " + factura.Pedido.Cliente.Nombre + ".pdf";
             String filePath = workingDirectory + fileName;
 
+
+            // Set up the content-disposition header with proper encoding of the filename
+            //var contentDisposition = new System.Net.Http.Headers.ContentDispositionHeaderValue("attachment");
+            //contentDisposition.FileName = Path.GetFileName(filePath);
+            //Response.Headers[HeaderNames.ContentDisposition] = contentDisposition.ToString();
+
+
             var bytes = await System.IO.File.ReadAllBytesAsync(filePath);
-            return File(bytes, "text/plain", Path.GetFileName(filePath));
+            return File(bytes, "application/pdf",Path.GetFileName(filePath));
+            //return new FileContentResult(bytes, "application/pdf");
         }
 
         // GET: api/Facturas
