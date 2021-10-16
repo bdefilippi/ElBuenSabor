@@ -166,7 +166,7 @@ namespace ElBuenSabor
             app.UseRouting();
 
             app.UseCors(options => {
-                options.WithOrigins("https://gustavovergara87.github.io", "http://localhost:8080", "http://elbuensabor.ddns.net:8080/");
+                options.WithOrigins("https://gustavovergara87.github.io", "http://localhost:8080", "http://elbuensabor.ddns.net:8080/", "http://192.168.1.35:8080");
                 //options.AllowAnyOrigin();
                 options.AllowAnyHeader();
                 options.AllowAnyMethod();
