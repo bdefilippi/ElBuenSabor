@@ -797,9 +797,9 @@ namespace ElBuenSabor.Controllers
                 },
                 BackUrls = new PreferenceBackUrlsRequest
                 {
-                    Success = "http://localhost:8080/cliente/Carrito/MercadoPagoResultado",
-                    Failure = "http://localhost:8080/cliente/Carrito/MercadoPagoResultado",
-                    Pending = "http://localhost:8080/cliente/Carrito/MercadoPagoResultado"
+                    Success = preferencia.frontURL,
+                    Failure = preferencia.frontURL,
+                    Pending = preferencia.frontURL
                 },
                 ExternalReference = Convert.ToString(preferencia.pedidoId),
                 //no se puede configurar que haga notificaciones a localHost, debe ser una url publica
