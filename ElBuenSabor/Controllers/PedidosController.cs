@@ -110,7 +110,6 @@ namespace ElBuenSabor.Controllers
             int estadoPrevio = pedidoPrevio.Estado;
             int estadoActual = pedido.Estado;
 
-
             _context.Entry(pedido).State = EntityState.Modified;
 
             try
@@ -128,6 +127,7 @@ namespace ElBuenSabor.Controllers
                     throw;
                 }
             }
+
 
             var pedidoParaDTO = await _context.Pedidos
             .Include(p => p.DetallesPedido)
@@ -173,6 +173,29 @@ namespace ElBuenSabor.Controllers
                     break;
 
                 case (a: PENDIENTE, b: APROBADO):
+
+                    //Revisar si HayStock (puede haber entrado muchos pedidos juntos y no quedar stock aun si al momento de pedirlos si habia)
+                    if (!await HayStock(pedido.Id))
+                    {
+                        mensaje = "No hay Stock";
+                        grupoDestino = pedido.ClienteID.ToString();
+                        EnviarNotificacionCliente(grupoDestino, mensaje, pedidoDTO);
+
+                        mensaje = "No hay Stock";
+                        grupoDestino = _context.Roles.Where(r => r.Nombre == "Cajero").FirstOrDefault().Id.ToString();
+                        EnviarNotificacionRol(grupoDestino, mensaje, pedidoDTO);
+
+                        //volver el estado del pedido a 0
+                        pedido.Estado = PENDIENTE;
+                        _context.Entry(pedido).State = EntityState.Modified;
+                        await _context.SaveChangesAsync();
+
+                        return StatusCode(409, "el pedido debe ser cancelado por falta de stock");
+                    }
+
+                    //si se aprueba el pedido, facturar el pedido
+                    await Facturar(pedidoParaDTO.Id);
+
                     mensaje = "Su pedido esta Aprobado y Facturado";
                     grupoDestino = pedido.ClienteID.ToString();
                     EnviarNotificacionCliente(grupoDestino, mensaje, pedidoDTO);
@@ -181,13 +204,7 @@ namespace ElBuenSabor.Controllers
                     grupoDestino = _context.Roles.Where(r=>r.Nombre=="Cocinero").FirstOrDefault().Id.ToString() ;
                     EnviarNotificacionRol(grupoDestino, mensaje, pedidoDTO);
 
-                    //Revisar si HayStock (puede haber entrado muchos pedidos juntos y no quedar stock aun si al momento de pedirlos si habia)
-                    if (! await HayStock(pedido.Id))
-                    {
-                        return StatusCode(409, "el pedido debe ser cancelado por falta de stock");
-                    }
-                    //si se aprueba el pedido, facturar el pedido
-                    await Facturar(pedidoParaDTO.Id);
+
                     break;
 
                 case (a: PENDIENTE, b: CANCELADO):
@@ -262,12 +279,20 @@ namespace ElBuenSabor.Controllers
                     break;
             }
 
+
+
+
+
             return NoContent();
         }
 
         private async Task<bool> HayStock(long pedidoId)
         {
             Pedido pedido = await _context.Pedidos
+             .Include(x => x.DetallesPedido)
+             .ThenInclude(x => x.Articulo)
+             .ThenInclude(x => x.Stocks)
+             
              .Include(x => x.DetallesPedido)
              .ThenInclude(x => x.Articulo)
              .ThenInclude(x => x.Recetas)
@@ -285,16 +310,36 @@ namespace ElBuenSabor.Controllers
                 {
                     foreach (var detalleReceta in detallePedido.Articulo.Recetas.FirstOrDefault().DetallesRecetas)
                     {
-                        long CantTotal = 0;
+                        long CantTotalDisponible = 0;
                         foreach (var stock in detalleReceta.Articulo.Stocks)
                         {
-                            CantTotal += stock.CantidadDisponible;
+                            CantTotalDisponible += stock.CantidadDisponible;
                         }
-                        if (cantDetallePedido * CantTotal < detalleReceta.Cantidad* cantDetallePedido)
+
+                        //Console.WriteLine("detalleReceta.Articulo.Denominacion: " + detalleReceta.Articulo.Denominacion);
+                        //Console.WriteLine("CantTotalDisponible: " + CantTotalDisponible);
+                        //Console.WriteLine("detalleReceta.Cantidad: " + detalleReceta.Cantidad);
+                        //Console.WriteLine("cantDetallePedido: " + cantDetallePedido);
+                        
+                        if (CantTotalDisponible < detalleReceta.Cantidad * cantDetallePedido)
                         {
                             return false;
                         }
                     }
+                }
+                else
+                {
+                    long CantTotalDisponible = 0;
+                    foreach (var stock in detallePedido.Articulo.Stocks)
+                    {
+                        CantTotalDisponible += stock.CantidadDisponible;
+                    }
+
+                    if ( CantTotalDisponible <  cantDetallePedido)
+                    {
+                        return false;
+                    }
+
                 }
             }
             return true;
