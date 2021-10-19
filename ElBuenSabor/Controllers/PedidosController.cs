@@ -310,20 +310,23 @@ namespace ElBuenSabor.Controllers
                 {
                     foreach (var detalleReceta in detallePedido.Articulo.Recetas.FirstOrDefault().DetallesRecetas)
                     {
-                        long CantTotalDisponible = 0;
-                        foreach (var stock in detalleReceta.Articulo.Stocks)
+                        if (detalleReceta.Articulo.Disabled == false && detalleReceta.Disabled==false)
                         {
-                            CantTotalDisponible += stock.CantidadDisponible;
-                        }
+                            long CantTotalDisponible = 0;
+                            foreach (var stock in detalleReceta.Articulo.Stocks)
+                            {
+                                CantTotalDisponible += stock.CantidadDisponible;
+                            }
 
-                        //Console.WriteLine("detalleReceta.Articulo.Denominacion: " + detalleReceta.Articulo.Denominacion);
-                        //Console.WriteLine("CantTotalDisponible: " + CantTotalDisponible);
-                        //Console.WriteLine("detalleReceta.Cantidad: " + detalleReceta.Cantidad);
-                        //Console.WriteLine("cantDetallePedido: " + cantDetallePedido);
-                        
-                        if (CantTotalDisponible < detalleReceta.Cantidad * cantDetallePedido)
-                        {
-                            return false;
+                            Console.WriteLine("detalleReceta.Articulo.Denominacion: " + detalleReceta.Articulo.Denominacion);
+                            Console.WriteLine("CantTotalDisponible: " + CantTotalDisponible);
+                            Console.WriteLine("detalleReceta.Cantidad: " + detalleReceta.Cantidad);
+                            Console.WriteLine("cantDetallePedido: " + cantDetallePedido);
+
+                            if (CantTotalDisponible < detalleReceta.Cantidad * cantDetallePedido)
+                            {
+                                return false;
+                            }
                         }
                     }
                 }
